@@ -5,10 +5,15 @@
 > **Alvo de UI**: CLI **ou** Desktop (Electron) **ou** Web local (decidir pelo caminho mais simples durante o MVP)
 
 
-`O CvApply é uma aplicação open source para desenvolvedores que automatiza a criação e adaptação de currículos para vagas — inicialmente focada no LinkedIn. O app coleta dados do usuário (formulários, LinkedIn, GitHub, CV existente), busca vagas, e usa LLMs para gerar versões do currículo alinhadas à descrição da vaga, em PT-BR e EN. Todo o processamento e armazenamento são locais, exceto chamadas opcionais à API de LLM (ou uso de LLM local).
+## Visão Geral / Overview
 
-EN: CvApply is an open-source app for developers that automates resume generation/tailoring for jobs — starting with LinkedIn. It ingests user data (forms, LinkedIn, GitHub, existing CV), searches jobs, and uses LLMs to produce role-aligned resumes in PT-BR and EN. All processing/storage is local, except optional calls to a cloud LLM API (or a local LLM)`
+**PT**: O **CvApply** é uma aplicação open source para desenvolvedores que automatiza a criação e adaptação de currículos para vagas — inicialmente focada no LinkedIn. O app coleta dados do usuário (formulários, LinkedIn, GitHub, CV existente), busca vagas, e usa LLMs para gerar versões do currículo alinhadas à descrição da vaga, em PT-BR e EN. Todo o processamento e armazenamento são **locais**, exceto chamadas opcionais à API de LLM (ou uso de LLM local).
 
+**EN**: **CvApply** is an open-source app for developers that automates resume generation/tailoring for jobs — starting with LinkedIn. It ingests user data (forms, LinkedIn, GitHub, existing CV), searches jobs, and uses LLMs to produce role-aligned resumes in PT-BR and EN. All processing/storage is **local**, except optional calls to a cloud LLM API (or a local LLM).
+
+> **Nota/Note**: Automação e scraping podem violar Termos de Serviço de terceiros. O uso é de responsabilidade do usuário. / Automation & scraping may violate third-party ToS. Use at your own risk.
+
+---
 
 ## Documentação / Table of Contents
 
@@ -33,21 +38,6 @@ EN: CvApply is an open-source app for developers that automates resume generatio
 * [Troubleshooting](#troubleshooting)
 
 
-
-
----
-
-
-
----
-
-## Visão Geral / Overview
-
-**PT**: O **CvApply** é uma aplicação open source para desenvolvedores que automatiza a criação e adaptação de currículos para vagas — inicialmente focada no LinkedIn. O app coleta dados do usuário (formulários, LinkedIn, GitHub, CV existente), busca vagas, e usa LLMs para gerar versões do currículo alinhadas à descrição da vaga, em PT-BR e EN. Todo o processamento e armazenamento são **locais**, exceto chamadas opcionais à API de LLM (ou uso de LLM local).
-
-**EN**: **CvApply** is an open-source app for developers that automates resume generation/tailoring for jobs — starting with LinkedIn. It ingests user data (forms, LinkedIn, GitHub, existing CV), searches jobs, and uses LLMs to produce role-aligned resumes in PT-BR and EN. All processing/storage is **local**, except optional calls to a cloud LLM API (or a local LLM).
-
-> **Nota/Note**: Automação e scraping podem violar Termos de Serviço de terceiros. O uso é de responsabilidade do usuário. / Automation & scraping may violate third-party ToS. Use at your own risk.
 
 ---
 
