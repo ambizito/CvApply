@@ -1,0 +1,90 @@
+<!-- Incluir as bibliotecas jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.js"></script>
+
+
+<STYLE>
+
+    #template{
+        background-image: url(/src/images/template2.png);
+    }
+
+    #template_nome{
+
+        color: red;
+    }
+
+</STYLE>
+
+<SCRIPT>
+
+  
+
+    function visualizar(){
+
+        localStorage.setItem("nome", document.getElementById('nome').value);
+        localStorage.setItem("idade", document.getElementById('idade').value);
+
+
+        //preencherHTML()
+        //gerarPDF();
+
+    }
+
+
+    function preencherHTML(){
+        document.getElementById('template_nome').innerHTML =  localStorage.getItem('nome');
+        document.getElementById('template_idade').innerHTML =  localStorage.getItem('idade');
+    }
+
+
+    function gerarPDF() {
+
+        window.jsPDF = window.jspdf.jsPDF;
+
+        // Obter o conteúdo HTML que deseja converter em PDF
+        var elemento = document.getElementById('template');
+     
+
+        // Criar um novo documento PDF
+        var doc = new jsPDF();
+
+
+        doc.html(elemento, {
+            callback: function(doc) {
+                // Save the PDF
+                doc.save('curriculo.pdf');
+            },
+            x: 15,
+            y: 15,
+            width: 170, //target width in the PDF document
+            windowWidth: 650 //window width in CSS pixels
+        });
+
+    }
+
+</SCRIPT>
+
+<DIV >
+    <DIV id="formulario">
+        <input type='text' id="nome">
+        <input type='text' id="idade">
+
+        <a href="javascript:visualizar()">Visualizar</a>
+        <a href="javascript:preencherHTML()">Preencher</a>
+        <a href="javascript:gerarPDF()">PDF</a>
+
+    </DIV>
+
+
+    <DIV id="template">
+
+        <TABLE>
+            <TR><TD>Nome:</TD><TD> <span id="template_nome">XXXXXX</span> </TD>
+            <TR><TD>Idade:</TD><TD> <span id="template_idade">XXXXXXX</span> </TD>
+        </TABLE>
+
+    </DIV>
+
+
+</DIV>
