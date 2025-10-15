@@ -10,7 +10,7 @@ Resumo: projeto front-end para criacao e personalizacao de curriculos (CV) com H
 
 ## Visao Geral
 
-O CvApply e um site estatico que ajuda o usuario a montar um curriculo de forma simples e rapida, alem de oferecer dicas e modelos prontos. O codigo-fonte do site esta em `src` e a documentacao detalhada esta organizada por secoes em `docs`.
+O CvApply é uma aplicação que utiliza modelos de linguagem (LLM) para gerar e adaptar currículos conforme vagas específicas, facilitando a personalização e otimização do CV para processos seletivos. Além disso, oferece dicas, modelos prontos e recursos avançados para o usuário. O código-fonte está em `src` e a documentação detalhada está organizada por seções em `docs`.
 
 ---
 
@@ -29,7 +29,6 @@ O CvApply e um site estatico que ajuda o usuario a montar um curriculo de forma 
 
 ## Documentacao
 
-- Documentacao de Contexto: `docs/01-Documentacao de Contexto.md`
 - Especificacao do Projeto: `docs/02-Especificação do Projeto.md`
 - Projeto de Interface: `docs/04-Projeto de Interface.md`
 - Arquitetura da Solucao: `docs/05-Arquitetura da Solução.md`
@@ -41,22 +40,6 @@ Tambem ha orientacoes especificas em `src/README.md` (uso do site) e `presentati
 
 ## Como Executar
 
-- Opcao rapida: abra `src/index.html` diretamente no navegador.
-- Servidor local (recomendado): sirva a pasta `src` com qualquer servidor HTTP estatico.
-
-Exemplos:
-
-```
-# Python 3
-python -m http.server -d src 5500
-
-# Node (npx serve)
-npx serve src -l 5500
-```
-
-Depois acesse `http://localhost:5500`.
-
----
 
 ## Estrutura do Repositorio
 

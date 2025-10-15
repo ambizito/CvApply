@@ -1,6 +1,6 @@
 # Projeto de Interface
 
-Este documento descreve, em alto nivel, como a interface sera apresentada ao usuario. Abaixo estao os topicos previstos; adicione os artefatos quando estiverem prontos.
+Este documento descreve, em alto nível, como a interface da aplicação CvApply será apresentada ao usuário. O foco é permitir a geração e adaptação de currículos com auxílio de modelos de linguagem (LLM), não apenas a montagem de CVs em um site estático. Abaixo estão os tópicos previstos; adicione os artefatos quando estiverem prontos.
 
 ## User Flow
 

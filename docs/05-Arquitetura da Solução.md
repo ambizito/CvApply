@@ -1,6 +1,6 @@
 # Arquitetura da Solucao
 
-Este documento sera detalhado quando a arquitetura for definida. Abaixo estao apenas os topicos de referencia.
+Este documento será detalhado quando a arquitetura da aplicação CvApply for definida. O projeto é voltado para geração e adaptação de currículos com LLM, indo além de um site estático. Abaixo estão apenas os tópicos de referência.
 
 ## Diagrama de Componentes
 

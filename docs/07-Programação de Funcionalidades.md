@@ -1,10 +1,10 @@
 # Programação de Funcionalidades
 
-Nesta seção são apresentadas as telas desenvolvidas para cada uma das funcionalidades
 do sistema. O respectivo endereço (URL) e outras orientações de acesso são são
-apresentadas na sequência.
-Visualização do site e dicas (RF-003 )
-A tela principal tem uma chamada para o facilidade que o site propõe, em ser simples montar seu CV. A segunda página ,traz uma síntese de como o site funciona. E na página 3 se encontram dicas para facilitar na montagem do CV.
+Nesta seção são apresentadas as telas e funcionalidades desenvolvidas para a aplicação CvApply, voltada para geração e adaptação de currículos com auxílio de modelos de linguagem (LLM). O respectivo endereço (URL) e outras orientações de acesso são apresentadas na sequência.
+
+Visualização da aplicação e dicas (RF-003)
+A tela principal destaca a facilidade que a aplicação propõe, permitindo montar e adaptar o CV conforme vagas específicas. A segunda página traz uma síntese de como a aplicação funciona, incluindo o uso de LLM para personalização. Na página 3 se encontram dicas para facilitar na montagem e adaptação do CV.
 
 Requisitos atendidos
   - RF-003
