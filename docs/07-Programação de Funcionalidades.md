@@ -42,3 +42,27 @@ Instruções de acesso
 6. Abra um navegador de Internet e informe a seguinte URL:
 http://localhost:5500/index.html
 
+
+## Instalação e Execução
+
+Opção rápida: abra `src/index.html` diretamente no navegador.
+
+Servidor local (recomendado): sirva a pasta `src` com um servidor HTTP estático.
+
+Exemplos:
+
+```
+# Python 3
+python -m http.server -d src 5500
+
+# Node (npx serve)
+npx serve src -l 5500
+```
+
+Acesse: http://localhost:5500
+
+## FAQ / Troubleshooting
+
+- Página não carrega estilos? Verifique caminhos relativos para `styles/` e `images/`.
+- Exportação para PDF sem formatação: use a opção de “Imprimir como PDF” do navegador e habilite “Gráficos de fundo”.
+- Porta já em uso (5500): escolha outra porta livre (ex.: 8080).

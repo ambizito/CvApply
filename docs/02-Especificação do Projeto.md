@@ -1,217 +1,74 @@
-# Especificações do Projeto
+# Especificacoes do Projeto
 
-Os pontos mais relevantes foram observados no nosso dia a dia, como trabalhadores ou recrutadores, sempre nos deparamos com alguns desses problemas. 
-
-## Personas
-
-* Fernanda Soares Brandão 
-
-Idade: 36 
-
-Ocupação: Agrónoma, trabalho em uma grande empresa de biotecnologia, faço pesquisas e análises de diversas culturas no país. 
-
-Motivações 
-
-Curiosa 
-
-Oportunidades 
-
-Amigos 
-
-Hobbies, História 
-
-Leitura 
-
-Passear na praia 
-
-* Gustavo Montreal 
-
-Idade: 38 
-
-Ocupação: Auditor, colaborador de uma multinacional de auditoria, responsável por fiscalizar empresas de médio e grande porte.  
-
-Motivações 
-
-Família 
-
-Conhecimento 
-
-Mudança de área 
-
-Hobbies, História 
-
-Jogos 
-
-Futebol 
-
-* Pedro Amorim 
-
-Idade: 32 
-
-Ocupação: Analista de recursos humanos, responsável pelo setor de RH de um hospital particular 
-
-Motivações 
-
-Música 
-
-Harmonia  
-
-Paz 
-
-Hobbies, História 
-
-Leitura 
-
-Música  
-
-Trilhas  
-
-* Maria Fonseca  
-
-Idade: 55 Anos 
-
-Ocupação: Dona de uma grande empresa Nacional de serviços gerais.  
-
-Motivações 
-
-Família  
-
-Lazer 
-
-Estabilidade  
-
-Hobbies, História 
-
-leitura 
-
-Estudo 
-
-Jogos de tabuleiro  
-
-* Neusa Faria Soares  
-
-Idade: 35 Anos 
-
-Ocupação: Auxiliar de serviços gerais  
-
-Motivações 
-
-Família  
-
-Religião 
-
-Estabilidade  
-
- 
-
-Frustrações 
-
-Poucas oportunidades 
-
-Hobbies, História 
-
-Não possui  
-
-* Márcio Figueiredo  
-
-Idade: 48 Anos 
-
-Ocupação: Auxiliar de contabilidade  
-
-Motivações 
-
-Família  
-
-Frustrações 
-
-Dificuldade em reingressar no mercado de trabalho 
-
-Hobbies, História 
-
-Jardinagem  
-
-
-
-## Histórias de Usuários
-
- 
-
-Eu como …                        | … quero/desejo …                                             |  … para ....                                                        |
-|--------------------------------|--------------------------------------------------------------|---------------------------------------------------------------------|
-||[PERSONA]                      | [O QUE]                                                      | [POR QUE]                                                           |
-|Fernanda Soares Brandão         | Receber indicações de vagas mais alinhadas com o meu CV      | Facilitaria na hora de procurar vagas em áreas, na qual, desejo atuar| 
-|Gustavo Montreal                | Colocar apenas o necessário e o que for relevante            | Um CV mais objetivo sem desvio e direto, pode ajudar na escolha    |
-|                                |                                                              | de um candidato para uma entrevista| 
-|Gustavo Montreal                | Ter um layout mais responsivo, apresentável e moderno        | Um layout moderno e de fácil visualização e boa resposta tátil, |
-|                                |                                                              | seria um diferencial para que ao menos as pessoas experimentassem o| 
-|                                |                                                              | site/app |
-|Fernanda Soares Brandão         | Poder receber feedbacks sobre melhorias no CV                | Ajudaria na formação de ideias para melhorias em meu CV |
-|Gustavo Montreal                | Acessibilidade e um layout de fácil uso/entendimento         | Pessoas idosas ou com necessidades especiais poderiam fazer, enviar| |                                |                                                              | e procurar o seu CV de forma simples, prática e rápida com a    |     |                                |                                                              | inserção de recursos voltados para esse público. |
-|Fernanda Soares Brandão          | Personalização e arquivamento de dados                       | Personalizar e guardar seus dados em um único lugar, seria muito|
- |                                |                                                              | cômodo e ágil na hora de criar ou mudar coisas no CV.|
-|Gustavo Montreal                 | Atualização e portabilidade em diversos dispositivos móveis  | Facilidade de acesso, pois, poderia entrar no site/app em qualquer |  |                                 |                                                              | lugar desde que tenha internet e claro atualização para melhorias de|                                  |                                                              | segurança nunca é demais.|
-|Fernanda Soares Brandão          | Um app que possa otimizar o meu tempo                        | Nos dias atuais tempo é tudo, se o app não oferece algum tipo de |                                     |                                                              | agilidade ou melhoria, será descartado.|
-|Pedro Amorim                     | Quero uma plataforma única e facilitada para coleta          | Por conta da alta demanda do setor, e dificuldade de armazenamento |                                   | organização de cv                                            | dos dados.|
-|Pedro Amorim                     | Fazer modelos de cv mais práticos, objetivos e completos     | Proporcionar um conforto maior no preenchimento das informações|
-|Pedro Amorim                     | Um programa para nos proporcionar opções de modelos de       | Ter layouts de cv parra uma possível escolha, para a facilitação do|                                    | currículos e preenchimento prático                           | preenchimento.|
-|Maria Fonseca                    | Encontrar funcionários qualificados com perfil da empresa    | Facilita o processo de contratação, pois faz uma filtragem maior.|
-|Márcio Figueiredo                | Reingressar ao mercado de trabalho                           | Muito tempo fora de atividade.|
-|Márcio Figueiredo                | Um CV atrativo, com informações certas para me candidatar    | Possuo um currículo, porém nunca tenho retorno quando me candidato|
-|                                 | a vagas                                                      | |
-|Maria Fonseca                    | Personalização de dados e armazenamento                      | Possibilitando atualizações de cv e seu armazenamento para  |       |                                   |                                                              | alterações futuras.|
-|Neusa Faria Soares               | Ter dicas do que escrever no CV                              | Para ser mais direta ao ponto.|
-|Pedro Amorim                     | Ter um acesso de qualquer lugar                              | Permitir o acesso de vários lugares e redução de custos.|
-|Neusa Faria Soares               | Montar um CV para candidatar a vagas relacionadas ao meu     | Que seja fácil por ter pouca prática com computador | 
-|                                 |                                                              | serviço.|
-|Maria Fonseca                    | Organização de CV                                            | Apresentação de currículos, com maior, número de informações e  |     |                                 |                                                              | organização.  |
-
+Os pontos mais relevantes foram observados no nosso dia a dia, como trabalhadores ou recrutadores, sempre nos deparamos com alguns desses problemas.
 
 ## Requisitos
 
-As tabelas que se seguem apresentam os requisitos funcionais e não funcionais que detalham o escopo do projeto.
+As tabelas a seguir consolidam os requisitos funcionais e nao funcionais derivados dos Recursos Principais.
 
 ### Requisitos Funcionais
 
-|ID    | Descrição do Requisito  | Prioridade |
-|------|------------------------------------------------------------------------------------|----|
-|RF-001| A aplicação deverá permitir o download do “CV em diferentes formatos, pdf, txt...” | ALTA | 
-|RF-002| A aplicação deve ser capaz de salvar meus dados.                                   | MÉDIA |
-|RF-003| A aplicação deve possuir um tópico de dicas de como montar um CV.                  | BAIXA | 
-|RF-004| A aplicação deve ter recurso de acessibilidade.                                    | ALTA |
-|RF-005| O sistema deverá aceitar a inserção de imagens.                                    | ALTA |
-|RF-006| A aplicação deve possuir layouts predefinidos e a opção de personalização.         | ALTA | 
-|RF-007| A aplicação deve ter páginas de fácil navegação, para facilitar correções,         | MÉDIA |
-|      | caso seja necessário                                                               |      |
-|RF-008| A aplicação deve ter a opção de envio do CV diretamente ao e-mail                  | ALTA |
+| ID     | Descricao do Requisito                                                                                              | Prioridade |
+|--------|---------------------------------------------------------------------------------------------------------------------|------------|
+| RF-001 | Importar dados via formularios e por arquivos (PDF/DOCX), com integracoes para LinkedIn e GitHub.                   | ALTA       |
+| RF-002 | Unificar e deduplicar experiencias com mesclagem assistida (LLM), permitindo "campos fixos" e "forcar inclusao".   | ALTA       |
+| RF-003 | Pesquisar vagas (LinkedIn) com filtros (palavra-chave, local/remoto, nivel) e salvar selecoes.                      | MEDIA      |
+| RF-004 | Gerar curriculo ATS-friendly (PT-BR/EN), carta de apresentacao e respostas de screening alinhadas a vaga.           | ALTA       |
+| RF-005 | Editar com diffs e manter versionamento por vaga, com historico de geracoes.                                        | MEDIA      |
+| RF-006 | Exportar artefatos em PDF, DOCX, HTML e Markdown.                                                                    | ALTA       |
+| RF-007 | Preencher candidatura com "um clique" quando possivel, solicitando confirmacoes humanas antes de enviar.           | MEDIA      |
+| RF-008 | Selecionar provedor de LLM (OpenAI/Azure/Anthropic/Local via Ollama) com fallback configuravel.                     | MEDIA      |
+| RF-009 | Armazenar dados localmente (sem banco) em JSON/YAML: perfis, vagas, geracoes e configuracoes.                       | ALTA       |
+| RF-010 | Interface Web local responsiva e acessivel, com navegacao simples entre etapas.                                      | ALTA       |
+| RF-011 | Permitir configuracao de idioma (PT-BR/EN) para CV e carta.                                                          | MEDIA      |
 
-### Requisitos não Funcionais
+### Requisitos Nao Funcionais
 
-|ID     | Descrição do Requisito  |Prioridade |
-|-------|-------------------------------------------------------------------|----|
-|RNF-001| A aplicação deve responder aos comandos em menos de 1 segundo.  | ALTA | 
-|RNF-002| A aplicação deve comportar uma total de 100 usuários simultâneos| BAIXA |
-|       | sem sofrer com instabilidades, a partir da 100ª requisição, o   |       |
-|       | sistema deverá ignorá-las para não sofrer com degradações.      |       |
-|RNF-003| A aplicação deve ser capaz de funcionar usando no máximo 25% do | ALTA | 
-|       | processador.                                                    |      |
-|RNF-004| A aplicação deve se recuperar de falhas em 1 segundo e ser      | BAIXA |
-|       | passível de atualizações e correções em 2 ou 3 semanas.         |       |
-|RNF-005| A aplicação deverá ser capaz de concluir a tarefa em no máximo  | ALTA | 
-|       | 1 minuto.                                                       |      |
-|RNF-006| A aplicação deve ser leve e otimizada para máquinas mais simples| ALTA |
-|RNF-007| A aplicação deve ter um layout simples, moderno e de fácil      | ALTA |
-|RNF-008| A aplicação deverá ser ágil, versátil e sem travamentos.        | ALTA |
-|RNF-009| A aplicação deve ser responsiva, para celular e tablet          | MÉDIA |
- 
+| ID      | Descricao do Requisito                                                                                 | Prioridade |
+|---------|---------------------------------------------------------------------------------------------------------|------------|
+| RNF-001 | Desempenho: interacoes comuns < 500 ms; geracoes/exportacoes < 5 s em hardware comum.                  | ALTA       |
+| RNF-002 | Responsividade: uso fluido em desktop e dispositivos moveis.                                           | ALTA       |
+| RNF-003 | Privacidade: dados locais por padrao; sem telemetria; LLM em nuvem apenas com consentimento explicito. | ALTA       |
+| RNF-004 | Confiabilidade: nao corromper dados; versoes imutaveis; recuperacao de sessao apos falhas.             | MEDIA      |
+| RNF-005 | Compatibilidade: navegadores modernos (Chrome, Edge, Firefox, Safari) atualizados.                     | MEDIA      |
+| RNF-006 | Acessibilidade/Usabilidade: navegacao por teclado, contraste adequado e marcas ARIA basicas.           | MEDIA      |
+| RNF-007 | Extensibilidade: arquitetura por adapters (LLM/Scraper/Export) e configuracao declarativa.             | MEDIA      |
+| RNF-008 | Manutenibilidade: codigo modular, documentado e com logs legiveis.                                     | MEDIA      |
+| RNF-009 | Seguranca: validacao de entradas e de arquivos importados; evitar execucao de conteudo nao confiavel.  | ALTA       |
+| RNF-010 | Offline-first: funcionalidades principais sem conexao; degradacao graciosa quando usar servicos externos.| MEDIA     |
 
-## Restrições
+## Restricoes
 
-O projeto está restrito pelos itens apresentados na tabela a seguir.
+O projeto esta restrito pelos itens apresentados na tabela a seguir.
 
-|ID| Restrição                                             |
+|ID| Restricao                                             |
 |--|-------------------------------------------------------|
-|RE-01 | Inicialmente a aplicação não terá banco de dados  |
-|RE-02 | A aplicação deve ser implementada em HTML, CSS e JavaScript.  |
-|RE-03 | A aplicação deve ser executável em diversas plataformas como Windows, Unix, Android e IOS.   |
-|RE-04 | A aplicação deverá se integrar com sistemas legado.   |
+|RE-01 | Inicialmente a aplicacao nao tera banco de dados  |
+|RE-02 | A aplicacao deve ser implementada em HTML, CSS e JavaScript.  |
+|RE-03 | A aplicacao deve ser executavel em diversas plataformas como Windows, Unix, Android e iOS.   |
+|RE-04 | A aplicacao devera se integrar com sistemas legados.   |
+
+## Recursos Principais
+
+Conteudo movido para `README.md` (pagina principal) para dar visao rapida do produto.
+
+## Modos de Interface
+
+- Web Local: interface principal deste repositorio (site estatico em `src`).
+- CLI/Desktop (futuros): mantidos como opcoes de evolucao do MVP.
+
+## Fluxo de Uso (alto nivel)
+
+1. Perfil: usuario preenche formularios ou importa dados (LinkedIn/GitHub/CV).
+2. Normalizacao: merge/dedupe; marcar campos fixos e forcar inclusao quando necessario.
+3. Vagas: busca/scraping no LinkedIn; salvar selecao.
+4. Geracao: produzir CV/carta/answers alinhados a vaga; revisao humana com diffs.
+5. Exportacao: salvar em PDF/DOCX/HTML/MD e organizar por vaga/versao.
+
+## Seguranca e Privacidade
+
+- Local-first: dados permanecem no disco do usuario.
+- LLM Cloud (opcional): revisar politicas dos provedores antes de habilitar.
+- Sem telemetria: nao enviamos dados para terceiros.
+- Aviso: automacao/scraping podem violar ToS de terceiros; uso e de responsabilidade do usuario.
 
