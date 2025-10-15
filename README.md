@@ -1,31 +1,11 @@
-# Currículo Online
-
-`Análise e Desenvolvimento de Sistemas`
-
-`Projeto Front-End`
-
-`1o. Semestre`
-
-`Desenvolvimento de aplicação Web para criação de currículos profissionais.`
-
-## Integrantes
-
-* Bernardo Morais
-* Caio Augusto De Carvalho Rosa
-* Israel Cunha Da Silva
-* Leonardo Júnio De Paula
-* Mario Jose Copertino Filho
-* Sara Cristina Gilberto Pereira
-* Thais De Lima Figueiredo
+# CvApply
 
 
-## Orientador
+`O CvApply é uma aplicação open source para desenvolvedores que automatiza a criação e adaptação de currículos para vagas — inicialmente focada no LinkedIn. O app coleta dados do usuário (formulários, LinkedIn, GitHub, CV existente), busca vagas, e usa LLMs para gerar versões do currículo alinhadas à descrição da vaga, em PT-BR e EN. Todo o processamento e armazenamento são locais, exceto chamadas opcionais à API de LLM (ou uso de LLM local).
 
-* Nathalia Assis
+EN: CvApply is an open-source app for developers that automates resume generation/tailoring for jobs — starting with LinkedIn. It ingests user data (forms, LinkedIn, GitHub, existing CV), searches jobs, and uses LLMs to produce role-aligned resumes in PT-BR and EN. All processing/storage is local, except optional calls to a cloud LLM API (or a local LLM)`
 
-## Instruções de utilização
 
-Assim que a primeira versão do sistema estiver disponível, deverá complementar com as instruções de utilização. Descreva como instalar eventuais dependências e como executar a aplicação.
 
 # Documentação
 
@@ -43,9 +23,7 @@ Assim que a primeira versão do sistema estiver disponível, deverá complementa
 <li><a href="docs/11-Referências.md"> Referências</a></li>
 </ol>
 
-# Hospedagem
 
-* <a href="https://icei-puc-minas-pmv-ads.github.io/Aplicacao-WEB---Curriculo-Online/src/">Site</a> 
 
 # Armazenamento do Código-Fonte
 
