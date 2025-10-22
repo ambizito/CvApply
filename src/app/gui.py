@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import threading
 import tkinter as tk
-from tkinter import ttk, messagebox
 from pathlib import Path
+from tkinter import messagebox, ttk
+from typing import Callable, List
 
 from .playwright_controller import PlaywrightController
 from .session_manager import SessionManager, SessionStatus
+from .system_checks import SystemCheckResult, SystemTestRunner
 
 
 class Application(tk.Tk):
@@ -15,12 +17,14 @@ class Application(tk.Tk):
     def __init__(self, project_root: Path) -> None:
         super().__init__()
         self.title("CvApply - Onboarding")
-        self.geometry("720x480")
+        self.geometry("720x520")
         self.resizable(False, False)
 
         self.session_manager = SessionManager(project_root)
-        status = self.session_manager.status()
-        self.controller = PlaywrightController(status.profile_dir)
+        initial_status = self.session_manager.status()
+        self.controller = PlaywrightController(initial_status.profile_dir)
+        self.test_runner = SystemTestRunner(self.session_manager)
+        self._current_status = initial_status
 
         self.protocol("WM_DELETE_WINDOW", self._on_close)
 
@@ -28,29 +32,69 @@ class Application(tk.Tk):
         self._container.pack(fill=tk.BOTH, expand=True)
 
         self._container.bind("<<SessionInitialized>>", self._on_session_initialized)
+        self._container.bind("<<CredentialsSaved>>", self._on_credentials_saved)
+        self._container.bind("<<AutoLoginCompleted>>", self._on_auto_login_completed)
 
-        if status.initialized:
-            self._show_validation(status)
-        else:
-            self._show_onboarding(status)
+        self._show_preflight()
+
+    # region state helpers -------------------------------------------------
+    def _refresh_status(self) -> SessionStatus:
+        self._current_status = self.session_manager.status()
+        return self._current_status
 
     def _clear_container(self) -> None:
         for child in self._container.winfo_children():
             child.destroy()
 
+    # endregion ------------------------------------------------------------
+
+    def _show_preflight(self) -> None:
+        self._clear_container()
+        frame = PreflightFrame(
+            self._container,
+            self.test_runner,
+            on_success=self._advance_after_preflight,
+        )
+        frame.pack(fill=tk.BOTH, expand=True)
+
+    def _advance_after_preflight(self) -> None:
+        status = self._refresh_status()
+        if not status.has_credentials:
+            self._show_credentials(status)
+        elif not status.initialized:
+            self._show_onboarding(status)
+        else:
+            self._show_auto_login(status)
+
+    def _show_credentials(self, status: SessionStatus) -> None:
+        self._clear_container()
+        frame = CredentialsFrame(self._container, self.session_manager)
+        frame.pack(fill=tk.BOTH, expand=True)
+
     def _show_onboarding(self, status: SessionStatus) -> None:
         self._clear_container()
-        frame = OnboardingFrame(self._container, self.controller, self.session_manager)
+        frame = OnboardingFrame(self._container, self.controller, self.session_manager, status)
         frame.pack(fill=tk.BOTH, expand=True)
 
-    def _show_validation(self, status: SessionStatus) -> None:
+    def _show_auto_login(self, status: SessionStatus) -> None:
         self._clear_container()
-        frame = ValidationFrame(self._container, self.controller, self.session_manager, status)
+        frame = AutoLoginFrame(self._container, self.controller, status)
         frame.pack(fill=tk.BOTH, expand=True)
 
+    def _show_home(self, status: SessionStatus) -> None:
+        self._clear_container()
+        frame = HomeFrame(self._container, status)
+        frame.pack(fill=tk.BOTH, expand=True)
+
+    # region events --------------------------------------------------------
     def _on_session_initialized(self, _event: tk.Event) -> None:  # type: ignore[override]
-        status = self.session_manager.status()
-        self._show_validation(status)
+        self._show_auto_login(self._refresh_status())
+
+    def _on_credentials_saved(self, _event: tk.Event) -> None:  # type: ignore[override]
+        self._show_onboarding(self._refresh_status())
+
+    def _on_auto_login_completed(self, _event: tk.Event) -> None:  # type: ignore[override]
+        self._show_home(self._refresh_status())
 
     def _on_close(self) -> None:
         try:
@@ -59,12 +103,156 @@ class Application(tk.Tk):
             self.destroy()
 
 
+class PreflightFrame(ttk.Frame):
+    """Execute initial system checks before onboarding/login flows."""
+
+    def __init__(
+        self,
+        parent: tk.Widget,
+        runner: SystemTestRunner,
+        on_success: Callable[[], None],
+    ) -> None:
+        super().__init__(parent)
+        self.runner = runner
+        self.on_success = on_success
+        self._is_running = False
+        self._current_checks: List[str] = []
+        self._result_vars: List[tk.StringVar] = []
+
+        title = ttk.Label(self, text="Preparação do ambiente", font=("Helvetica", 16, "bold"))
+        title.pack(anchor=tk.W, pady=(0, 12))
+
+        description = (
+            "Antes de continuar, validaremos a conexão com a internet, o acesso ao LinkedIn "
+            "e a disponibilidade das credenciais salvas."
+        )
+        ttk.Label(self, text=description, wraplength=620, justify=tk.LEFT).pack(anchor=tk.W)
+
+        self.status_var = tk.StringVar(value="Executando verificações iniciais...")
+        ttk.Label(self, textvariable=self.status_var).pack(anchor=tk.W, pady=(12, 4))
+
+        self.list_frame = ttk.Frame(self, padding=(0, 8, 0, 0))
+        self.list_frame.pack(fill=tk.BOTH, expand=True)
+
+        self._prepare_rows()
+
+        self.retry_button = ttk.Button(self, text="Tentar novamente", command=self._start_checks)
+        self.retry_button.pack(anchor=tk.W, pady=(16, 0))
+        self.retry_button.config(state=tk.DISABLED)
+
+        self.after(100, self._start_checks)
+
+    def _prepare_rows(self) -> None:
+        checks = self.runner.get_checks()
+        self._current_checks = [check.name for check in checks]
+        for child in self.list_frame.winfo_children():
+            child.destroy()
+        self._result_vars.clear()
+        for name in self._current_checks:
+            var = tk.StringVar(value=f"{name}: aguardando...")
+            self._result_vars.append(var)
+            ttk.Label(self.list_frame, textvariable=var, wraplength=620, justify=tk.LEFT).pack(anchor=tk.W, pady=2)
+
+    def _start_checks(self) -> None:
+        if self._is_running:
+            return
+        self._is_running = True
+        self.retry_button.config(state=tk.DISABLED)
+        self.status_var.set("Executando verificações iniciais...")
+        self._prepare_rows()
+        checks = self.runner.get_checks()
+
+        def _worker() -> None:
+            results: List[SystemCheckResult] = []
+            for index, check in enumerate(checks):
+                result = check.run()
+                results.append(result)
+                self.after(0, lambda idx=index, res=result: self._update_result(idx, res))
+            self.after(0, lambda: self._finish(results))
+
+        threading.Thread(target=_worker, daemon=True).start()
+
+    def _update_result(self, index: int, result: SystemCheckResult) -> None:
+        status_text = "OK" if result.success else "Falha"
+        details = f" - {result.details}" if result.details else ""
+        if index < len(self._result_vars):
+            self._result_vars[index].set(f"{self._current_checks[index]}: {status_text}{details}")
+
+    def _finish(self, results: List[SystemCheckResult]) -> None:
+        self._is_running = False
+        if all(result.success for result in results):
+            self.status_var.set("Todas as verificações foram concluídas com sucesso.")
+            self.after(200, self.on_success)
+        else:
+            self.status_var.set(
+                "Algumas verificações falharam. Ajuste o ambiente ou corrija as credenciais e tente novamente."
+            )
+            self.retry_button.config(state=tk.NORMAL)
+
+
+class CredentialsFrame(ttk.Frame):
+    """Collect LinkedIn credentials on the first execution."""
+
+    def __init__(self, parent: tk.Widget, session_manager: SessionManager) -> None:
+        super().__init__(parent)
+        self.session_manager = session_manager
+        self.email_var = tk.StringVar()
+        self.password_var = tk.StringVar()
+
+        title = ttk.Label(self, text="Configuração de credenciais", font=("Helvetica", 16, "bold"))
+        title.pack(anchor=tk.W, pady=(0, 12))
+
+        ttk.Label(
+            self,
+            text=(
+                "Informe o email e a senha do LinkedIn. Essas informações serão salvas localmente para "
+                "automatizar o login nas próximas execuções."
+            ),
+            wraplength=620,
+            justify=tk.LEFT,
+        ).pack(anchor=tk.W)
+
+        form = ttk.Frame(self, padding=(0, 16, 0, 0))
+        form.pack(fill=tk.X)
+
+        ttk.Label(form, text="Email").grid(row=0, column=0, sticky=tk.W)
+        ttk.Entry(form, textvariable=self.email_var).grid(row=1, column=0, sticky=tk.EW, pady=(0, 8))
+
+        ttk.Label(form, text="Senha").grid(row=2, column=0, sticky=tk.W)
+        ttk.Entry(form, textvariable=self.password_var, show="*").grid(row=3, column=0, sticky=tk.EW)
+
+        form.columnconfigure(0, weight=1)
+
+        ttk.Button(self, text="Salvar credenciais", command=self._save_credentials).pack(anchor=tk.W, pady=(16, 0))
+
+    def _save_credentials(self) -> None:
+        email = self.email_var.get().strip()
+        password = self.password_var.get()
+
+        if "@" not in email:
+            messagebox.showerror("Email inválido", "Informe um email válido do LinkedIn.")
+            return
+        if len(password) < 8:
+            messagebox.showerror("Senha inválida", "A senha precisa ter pelo menos 8 caracteres.")
+            return
+
+        self.session_manager.save_credentials(email, password)
+        messagebox.showinfo("Credenciais salvas", "As credenciais foram armazenadas com sucesso.")
+        self.master.event_generate("<<CredentialsSaved>>", when="tail")
+
+
 class OnboardingFrame(ttk.Frame):
-    def __init__(self, parent: tk.Widget, controller: PlaywrightController, session_manager: SessionManager) -> None:
+    def __init__(
+        self,
+        parent: tk.Widget,
+        controller: PlaywrightController,
+        session_manager: SessionManager,
+        status: SessionStatus,
+    ) -> None:
         super().__init__(parent)
         self.controller = controller
         self.session_manager = session_manager
-        self.login_url_var = tk.StringVar(value="https://www.linkedin.com")
+        self.login_url_var = tk.StringVar(value=status.login_url or "https://www.linkedin.com")
 
         title = ttk.Label(self, text="Primeiro acesso", font=("Helvetica", 16, "bold"))
         title.pack(anchor=tk.W, pady=(0, 12))
@@ -88,7 +276,9 @@ class OnboardingFrame(ttk.Frame):
         actions.pack(fill=tk.X)
         self.open_button = ttk.Button(actions, text="Abrir navegador", command=self._open_browser)
         self.open_button.pack(side=tk.LEFT)
-        self.confirm_button = ttk.Button(actions, text="Confirmar login", command=self._confirm_login, state=tk.DISABLED)
+        self.confirm_button = ttk.Button(
+            actions, text="Confirmar login", command=self._confirm_login, state=tk.DISABLED
+        )
         self.confirm_button.pack(side=tk.LEFT, padx=(12, 0))
 
     def _open_browser(self) -> None:
@@ -142,61 +332,109 @@ class OnboardingFrame(ttk.Frame):
         self.master.event_generate("<<SessionInitialized>>", when="tail")
 
 
-class ValidationFrame(ttk.Frame):
-    def __init__(
-        self,
-        parent: tk.Widget,
-        controller: PlaywrightController,
-        session_manager: SessionManager,
-        status: SessionStatus,
-    ) -> None:
+class AutoLoginFrame(ttk.Frame):
+    """Attempt to reuse stored session and open the LinkedIn home automatically."""
+
+    def __init__(self, parent: tk.Widget, controller: PlaywrightController, status: SessionStatus) -> None:
         super().__init__(parent)
         self.controller = controller
-        self.session_manager = session_manager
         self.status = status
+        self._is_running = False
 
-        title = ttk.Label(self, text="Verificação de sessão", font=("Helvetica", 16, "bold"))
+        title = ttk.Label(self, text="Login automático", font=("Helvetica", 16, "bold"))
         title.pack(anchor=tk.W, pady=(0, 12))
 
-        self.feedback = ttk.Label(self, text="Validando sessão salva...", wraplength=620, justify=tk.LEFT)
-        self.feedback.pack(anchor=tk.W)
+        description = (
+            "Vamos reutilizar a sessão salva para abrir diretamente a página inicial do LinkedIn."
+        )
+        ttk.Label(self, text=description, wraplength=620, justify=tk.LEFT).pack(anchor=tk.W)
 
-        self.after(100, self._validate_session)
+        self.status_var = tk.StringVar(value="Iniciando login automático...")
+        ttk.Label(self, textvariable=self.status_var).pack(anchor=tk.W, pady=(12, 0))
 
         actions = ttk.Frame(self, padding=(0, 24, 0, 0))
-        actions.pack(fill=tk.X)
-        ttk.Button(actions, text="Abrir navegador", command=self._open_dashboard_browser).pack(side=tk.LEFT)
+        actions.pack(anchor=tk.W)
+        self.retry_button = ttk.Button(actions, text="Tentar novamente", command=self._start_login)
+        self.retry_button.pack(side=tk.LEFT)
+        self.retry_button.config(state=tk.DISABLED)
 
-    def _validate_session(self) -> None:
-        def _task() -> bool:
-            probe_url = self.status.login_url or "about:blank"
-            return self.controller.validate_session(probe_url)
+        self.after(150, self._start_login)
 
-        def _update(result: bool) -> None:
-            if result:
-                self.feedback.config(
-                    text=(
-                        "Sessão carregada com sucesso! Você pode avançar para o painel principal. "
-                        "(Funcionalidades serão implementadas nas próximas etapas.)"
-                    )
-                )
-            else:
-                self.feedback.config(
-                    text=(
-                        "Não foi possível validar a sessão salva. Utilize o menu de configurações futuras para "
-                        "repetir o processo de login."
-                    )
-                )
+    def _start_login(self) -> None:
+        if self._is_running:
+            return
+        self._is_running = True
+        self.retry_button.config(state=tk.DISABLED)
+        self.status_var.set("Abrindo o LinkedIn com as credenciais salvas...")
+
+        home_url = self.status.login_url or "https://www.linkedin.com/feed/"
+        future = self.controller.open_login(home_url)
 
         def _worker() -> None:
-            result = _task()
-            self.after(0, lambda: _update(result))
+            try:
+                future.result()
+            except Exception as exc:  # noqa: BLE001
+                self.after(0, lambda: self._on_failure(exc))
+            else:
+                self.after(0, self._on_success)
 
         threading.Thread(target=_worker, daemon=True).start()
 
-    def _open_dashboard_browser(self) -> None:
+    def _on_success(self) -> None:
+        self._is_running = False
+        self.status_var.set("Login automático concluído. O navegador está na página inicial do LinkedIn.")
+        self.master.event_generate("<<AutoLoginCompleted>>", when="tail")
+
+    def _on_failure(self, exc: Exception) -> None:
+        self._is_running = False
+        self.status_var.set(f"Falha ao abrir o LinkedIn automaticamente: {exc}")
+        self.retry_button.config(state=tk.NORMAL)
+
+
+class HomeFrame(ttk.Frame):
+    """Simple placeholder for the home/dashboard screen."""
+
+    def __init__(self, parent: tk.Widget, status: SessionStatus) -> None:
+        super().__init__(parent)
+        email_display = status.email or "usuário"
+
+        title = ttk.Label(self, text="Página inicial", font=("Helvetica", 16, "bold"))
+        title.pack(anchor=tk.W, pady=(0, 12))
+
+        message = (
+            f"Bem-vindo(a), {email_display}! Se o navegador estiver aberto com sua conta, você já pode continuar "
+            "as próximas etapas do CvApply."
+        )
+        ttk.Label(self, text=message, wraplength=620, justify=tk.LEFT).pack(anchor=tk.W)
+
+        ttk.Button(self, text="Abrir LinkedIn novamente", command=self._open_linkedin).pack(anchor=tk.W, pady=(16, 0))
+
+        ttk.Button(
+            self,
+            text="Redigir carta de apresentação",
+            command=self._compose_cover_letter,
+        ).pack(anchor=tk.W, pady=(8, 0))
+
+        ttk.Button(
+            self,
+            text="Preparar email de candidatura",
+            command=self._draft_application_email,
+        ).pack(anchor=tk.W, pady=(8, 0))
+
+    def _open_linkedin(self) -> None:
         messagebox.showinfo(
             "Em desenvolvimento",
-            "As funcionalidades de busca de vagas e preenchimento automático serão adicionadas em breve.",
+            "A navegação completa do painel será implementada nas próximas etapas.",
         )
 
+    def _compose_cover_letter(self) -> None:
+        messagebox.showinfo(
+            "Em desenvolvimento",
+            "A redação assistida de cartas de apresentação será adicionada futuramente.",
+        )
+
+    def _draft_application_email(self) -> None:
+        messagebox.showinfo(
+            "Em desenvolvimento",
+            "O assistente para montar emails de candidatura será implementado nas próximas etapas.",
+        )

@@ -19,6 +19,9 @@ As tabelas que se seguem apresentam os requisitos funcionais e não funcionais q
 |      | caso seja necessário                                                               |      |
 |RF-008| A aplicação deve identificar quando um CAPTCHA aparecer e solicitar ao usuário     | ALTA |
 |      | que o resolva antes de prosseguir.                                                 |      |
+|RF-009| A aplicação deve permitir a redação de cartas de apresentação personalizadas para  | ALTA |
+|      | cada candidatura.                                                                  |      |
+|RF-010| A aplicação deve redigir emails de candidatura endereçados à empresa da vaga.      | MÉDIA |
 
 
 ### Requisitos não Funcionais
@@ -59,6 +62,7 @@ O projeto está restrito pelos itens apresentados na tabela a seguir.
 
 ## Fluxo de Uso (alto nível)
 
+0. Pré-verificações: validar conexão com a internet, acesso ao LinkedIn e credenciais locais antes de iniciar o onboarding.
 1. Perfil: usuário preenche formulários ou importa dados (LinkedIn/GitHub/CV).
 2. Normalização: merge/dedupe; marcar campos fixos e forçar inclusão quando necessário.
 3. Vagas: busca/scraping no LinkedIn; salvar seleção.

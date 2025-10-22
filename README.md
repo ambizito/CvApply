@@ -4,7 +4,7 @@
 > Licenca sugerida: Apache-2.0
 > Alvo de UI: CLI, Desktop (Electron) ou Web local (a decidir no MVP)
 
-Resumo: projeto front-end para criacao e personalizacao de curriculos (CV) com HTML/CSS/JS. Este repositorio segue um template de documentacao com secoes organizadas na pasta `docs`.
+Resumo: projeto front-end para criacao e personalizacao de curriculos (CV) com HTML/CSS/JS. Este repositorio segue um template de documentacao com secoes organizadas na pasta `docs`. O protótipo atual inclui uma aplicação Tkinter responsável por realizar verificações prévias de ambiente, coletar as credenciais do LinkedIn e iniciar o fluxo automático de login quando os pré-requisitos são atendidos.
 
 ---
 
@@ -58,7 +58,24 @@ Tambem ha orientacoes especificas em `src/README.md` (uso do site) e `presentati
    python -m src.main
    ```
 
-Na primeira execução, o aplicativo abrirá uma janela do navegador WebKit em modo visual para que você realize o login manualmente. Após confirmar o login na interface nativa, o perfil persistente ficará salvo em `storage/webkit_profile`, permitindo reutilizar a sessão nas execuções seguintes.
+   Ao iniciar, a aplicação executa automaticamente uma sequência de verificações:
+
+   1. Conectividade com a internet (`https://www.google.com`).
+   2. Acesso à página inicial do LinkedIn (com até 5 tentativas e intervalo de 5s).
+   3. Presença de credenciais armazenadas localmente.
+   4. Validação básica do formato das credenciais (email e senha).
+
+   Em caso de falha em qualquer etapa, a UI apresenta o status individual dos testes e permite tentar novamente após os ajustes necessários. Quando todas as verificações forem aprovadas, o fluxo segue para a coleta de credenciais (primeira execução), onboarding guiado no WebKit e, nas execuções seguintes, tentativa automática de login e abertura da página Home.
+
+### Execução de testes automatizados
+
+Para validar as rotinas de verificação do sistema e garantir a regressão dos fluxos existentes, execute:
+
+```bash
+pytest
+```
+
+Os testes utilizam `pytest` e cobrem os cenários principais de conectividade e persistência de credenciais, além de manter cenários futuros marcados como `xfail` até que as funcionalidades sejam implementadas.
 
 ## Estrutura do Repositorio
 
