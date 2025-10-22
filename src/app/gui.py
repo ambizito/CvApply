@@ -180,9 +180,13 @@ class PreflightFrame(ttk.Frame):
 
     def _finish(self, results: List[SystemCheckResult]) -> None:
         self._is_running = False
+        cred_check = next((r for r in results if r.name == "Credenciais disponíveis"), None)
         if all(result.success for result in results):
             self.status_var.set("Todas as verificações foram concluídas com sucesso.")
             self.after(200, self.on_success)
+        elif cred_check and not cred_check.success:
+            self.status_var.set("Credenciais não encontradas. Por favor, cadastre suas credenciais do LinkedIn.")
+            self.after(200, lambda: self.master.event_generate("<<CredentialsSaved>>", when="tail"))
         else:
             self.status_var.set(
                 "Algumas verificações falharam. Ajuste o ambiente ou corrija as credenciais e tente novamente."
@@ -272,14 +276,17 @@ class OnboardingFrame(ttk.Frame):
         ttk.Label(form, text="URL de login").pack(anchor=tk.W)
         ttk.Entry(form, textvariable=self.login_url_var).pack(fill=tk.X)
 
+
         actions = ttk.Frame(self, padding=(0, 24, 0, 0))
         actions.pack(fill=tk.X)
-        self.open_button = ttk.Button(actions, text="Abrir navegador", command=self._open_browser)
-        self.open_button.pack(side=tk.LEFT)
         self.confirm_button = ttk.Button(
             actions, text="Confirmar login", command=self._confirm_login, state=tk.DISABLED
         )
         self.confirm_button.pack(side=tk.LEFT, padx=(12, 0))
+
+        # Abre o navegador automaticamente na página de login do LinkedIn
+        self.after(200, self._open_browser)
+
 
     def _open_browser(self) -> None:
         url = self.login_url_var.get().strip()
@@ -287,7 +294,15 @@ class OnboardingFrame(ttk.Frame):
             messagebox.showerror("URL inválida", "Informe uma URL para iniciar o login.")
             return
 
-        self.open_button.config(state=tk.DISABLED)
+        # Executa o teste de acesso ao LinkedIn antes de abrir o navegador
+        from .system_checks import LinkedInAccessCheck
+        check = LinkedInAccessCheck()
+        result = check.run()
+        if not result.success:
+            messagebox.showerror("Falha de acesso ao LinkedIn", result.details)
+            return
+
+        # Abre o navegador e detecta campos de login
         future = self.controller.open_login(url)
 
         def _wait_for_open() -> None:
@@ -297,25 +312,53 @@ class OnboardingFrame(ttk.Frame):
                 self.after(
                     0,
                     lambda: (
-                        self.open_button.config(state=tk.NORMAL),
                         messagebox.showerror("Erro ao abrir navegador", str(exc)),
                     ),
                 )
                 return
 
-            self.after(
-                0,
-                lambda: (
-                    self.confirm_button.config(state=tk.NORMAL),
-                    self.open_button.config(state=tk.NORMAL),
-                    messagebox.showinfo(
-                        "Navegador pronto",
-                        "O navegador está aberto. Complete o login manualmente e, ao finalizar, feche a janela \npara continuar.",
-                    ),
-                ),
-            )
+            # Após abrir, tenta detectar campos de login
+            self.after(0, self._detect_login_fields)
 
         threading.Thread(target=_wait_for_open, daemon=True).start()
+
+    def _detect_login_fields(self):
+        # Aqui você pode implementar a lógica de detecção dos campos de login via Playwright
+        # Para simplificação, vamos abrir um popup para o usuário informar email e senha
+        cred_window = tk.Toplevel(self)
+        cred_window.title("Preencher credenciais LinkedIn")
+        cred_window.geometry("350x200")
+        cred_window.resizable(False, False)
+
+        tk.Label(cred_window, text="Email:").pack(pady=(20, 0))
+        email_var = tk.StringVar()
+        tk.Entry(cred_window, textvariable=email_var).pack()
+
+        tk.Label(cred_window, text="Senha:").pack(pady=(10, 0))
+        senha_var = tk.StringVar()
+        tk.Entry(cred_window, textvariable=senha_var, show="*").pack()
+
+        def submit():
+            email = email_var.get().strip()
+            senha = senha_var.get().strip()
+            if not email or not senha:
+                messagebox.showerror("Erro", "Preencha email e senha.")
+                return
+            cred_window.destroy()
+            # Aqui você pode usar Playwright para preencher os campos de login
+            self._fill_login_fields(email, senha)
+
+        tk.Button(cred_window, text="Entrar", command=submit).pack(pady=(20, 0))
+
+    def _fill_login_fields(self, email, senha):
+        # Aqui você implementaria o preenchimento automático dos campos via Playwright
+        # Exemplo simplificado (deve ser adaptado para uso real):
+        try:
+            # Exemplo: self.controller.fill_linkedin_login(email, senha)
+            messagebox.showinfo("Login", "Credenciais enviadas para o LinkedIn. (Automação a implementar)")
+            self.confirm_button.config(state=tk.NORMAL)
+        except Exception as exc:
+            messagebox.showerror("Erro de automação", str(exc))
 
     def _confirm_login(self) -> None:
         try:
