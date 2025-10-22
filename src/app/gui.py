@@ -64,7 +64,7 @@ class OnboardingFrame(ttk.Frame):
         super().__init__(parent)
         self.controller = controller
         self.session_manager = session_manager
-        self.login_url_var = tk.StringVar(value="https://example.com")
+        self.login_url_var = tk.StringVar(value="https://www.linkedin.com")
 
         title = ttk.Label(self, text="Primeiro acesso", font=("Helvetica", 16, "bold"))
         title.pack(anchor=tk.W, pady=(0, 12))
