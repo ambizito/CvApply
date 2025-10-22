@@ -47,6 +47,8 @@ Tambem ha orientacoes especificas em `src/README.md` (uso do site) e `presentati
    python -m pip install --upgrade pip
    python -m pip install -r requirements.txt
    ```
+   > A versão do Playwright fixada (1.55.0) já inclui binários recentes do `greenlet`, evitando a necessidade de compilações
+   > manuais em ambientes Windows/VMs mesmo com Python 3.14.
 2. Instale o runtime do Playwright para o WebKit (necessário apenas na primeira execução):
    ```bash
    playwright install webkit

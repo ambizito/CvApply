@@ -6,7 +6,12 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Optional
 
-from playwright.async_api import BrowserContext, Playwright, async_playwright
+from playwright.async_api import (
+    BrowserContext,
+    Error as PlaywrightError,
+    Playwright,
+    async_playwright,
+)
 
 
 class PlaywrightController:
@@ -15,6 +20,7 @@ class PlaywrightController:
     def __init__(self, profile_dir: Path) -> None:
         self.profile_dir = profile_dir
         self._loop = asyncio.new_event_loop()
+        self._loop_ready = threading.Event()
         self._thread = threading.Thread(target=self._run_loop, daemon=True)
         self._thread.start()
         self._playwright: Optional[Playwright] = None
@@ -23,6 +29,7 @@ class PlaywrightController:
 
     def _run_loop(self) -> None:
         asyncio.set_event_loop(self._loop)
+        self._loop_ready.set()
         self._loop.run_forever()
 
     async def _ensure_playwright(self) -> Playwright:
@@ -34,15 +41,27 @@ class PlaywrightController:
         await self._ensure_playwright()
         if self._context is None:
             self.profile_dir.mkdir(parents=True, exist_ok=True)
-            self._context = await self._playwright.webkit.launch_persistent_context(
-                str(self.profile_dir),
-                headless=headless,
-            )
+            try:
+                self._context = await self._playwright.webkit.launch_persistent_context(
+                    str(self.profile_dir),
+                    headless=headless,
+                )
+            except PlaywrightError as exc:  # pragma: no cover - runtime guard
+                message = (
+                    "Falha ao iniciar o WebKit persistente. Verifique se o runtime foi instalado com \n"
+                    "`playwright install webkit` e tente novamente."
+                )
+                raise RuntimeError(message) from exc
         return self._context
 
     def open_login(self, url: str) -> asyncio.Future:
         """Launch (or reuse) the persistent browser in headful mode."""
 
+        self._loop_ready.wait()
+        if self._loop.is_closed():
+            raise RuntimeError("O controlador do Playwright já foi finalizado.")
+        if not self._loop.is_running():
+            raise RuntimeError("O controlador do Playwright já foi finalizado.")
         return asyncio.run_coroutine_threadsafe(self._open_login(url), self._loop)
 
     async def _open_login(self, url: str) -> None:
@@ -56,6 +75,9 @@ class PlaywrightController:
             await page.goto(url)
 
     def close_browser(self) -> None:
+        self._loop_ready.wait()
+        if self._loop.is_closed() or not self._loop.is_running():
+            return
         future = asyncio.run_coroutine_threadsafe(self._close_browser(), self._loop)
         future.result()
 
@@ -66,6 +88,9 @@ class PlaywrightController:
                 self._context = None
 
     def validate_session(self, probe_url: Optional[str] = None) -> bool:
+        self._loop_ready.wait()
+        if self._loop.is_closed() or not self._loop.is_running():
+            return False
         future = asyncio.run_coroutine_threadsafe(self._validate_session(probe_url), self._loop)
         return future.result()
 
@@ -77,11 +102,18 @@ class PlaywrightController:
                 self._context = None
 
             playwright = await self._ensure_playwright()
-            # Launch a temporary headless context to inspect storage state.
-            context = await playwright.webkit.launch_persistent_context(
-                str(self.profile_dir),
-                headless=True,
-            )
+            try:
+                # Launch a temporary headless context to inspect storage state.
+                context = await playwright.webkit.launch_persistent_context(
+                    str(self.profile_dir),
+                    headless=True,
+                )
+            except PlaywrightError as exc:  # pragma: no cover - runtime guard
+                message = (
+                    "Não foi possível validar o perfil persistente porque o runtime do WebKit não está disponível. \n"
+                    "Execute `playwright install webkit` e repita a operação."
+                )
+                raise RuntimeError(message) from exc
             try:
                 page = context.pages[0] if context.pages else await context.new_page()
                 if probe_url:
@@ -96,10 +128,15 @@ class PlaywrightController:
                 await context.close()
 
     def shutdown(self) -> None:
-        future = asyncio.run_coroutine_threadsafe(self._shutdown(), self._loop)
-        future.result()
-        self._loop.call_soon_threadsafe(self._loop.stop)
-        self._thread.join()
+        self._loop_ready.wait()
+        if self._loop.is_closed():
+            return
+        if self._loop.is_running():
+            future = asyncio.run_coroutine_threadsafe(self._shutdown(), self._loop)
+            future.result()
+            self._loop.call_soon_threadsafe(self._loop.stop)
+            self._thread.join()
+        self._loop.close()
 
     async def _shutdown(self) -> None:
         async with self._context_lock():
