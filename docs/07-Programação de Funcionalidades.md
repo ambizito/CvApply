@@ -1,68 +1,53 @@
 # Programação de Funcionalidades
 
-do sistema. O respectivo endereço (URL) e outras orientações de acesso são são
-Nesta seção são apresentadas as telas e funcionalidades desenvolvidas para a aplicação CvApply, voltada para geração e adaptação de currículos com auxílio de modelos de linguagem (LLM). O respectivo endereço (URL) e outras orientações de acesso são apresentadas na sequência.
+Esta seção descreve as funcionalidades planejadas para o CvApply considerando a nova arquitetura local com backend Python, automação Playwright/WebKit e interface Tkinter/ttk. O objetivo é manter o usuário no controle, acompanhando automações em tempo real e armazenando dados apenas no dispositivo.
 
-Visualização da aplicação e dicas (RF-003)
-A tela principal destaca a facilidade que a aplicação propõe, permitindo montar e adaptar o CV conforme vagas específicas. A segunda página traz uma síntese de como a aplicação funciona, incluindo o uso de LLM para personalização. Na página 3 se encontram dicas para facilitar na montagem e adaptação do CV.
+## Visão Geral do Fluxo
 
-Requisitos atendidos
-  - RF-003
-  - RF-007
-  
-Artefatos de funcionalidade
-  - index.html
-  - app.js
-  - style.scss
- 
+1. **Inicialização**
+   - Leitura de arquivos JSON (`profiles.json`, `jobs.json`, `runs.json`, `settings.json`).
+   - Carregamento do `.env` para chaves de LLM e parâmetros de scraping.
+   - Sincronização da UI com o estado persistido (últimos perfis e vagas acessadas).
 
-![Telas](img/dicas1.png) 
-![Telas](img/funciona.png)
+2. **Gestão de Perfil e Currículo**
+   - Formulários Tkinter/ttk para dados pessoais, experiências, habilidades e idiomas.
+   - Validação imediata (campos obrigatórios, limites de caracteres) e salvamento incremental no JSON.
+   - Geração de versões de currículo baseadas em templates (PDF/DOCX/HTML/Markdown) com revisão visual.
 
-O menu interativo e funcional (RF-007)
-O menu interativo é fixo em todas as páginas principais, facilitando a navegação entre elas. E na página de criação do CV, existe a opção de voltar e reiniciar o projeto.
+3. **Busca e Scraping de Vagas**
+   - Configuração de filtros (palavras-chave, local, tipo de contrato) e execução do Playwright em WebKit headed.
+   - Exibição do navegador durante a automação, permitindo ao usuário acompanhar cliques, scrolls e coletas.
+   - Detecção de CAPTCHA via eventos de DOM; a UI pausa o fluxo e solicita que o usuário resolva manualmente (RF-008).
+   - Registro estruturado das vagas encontradas em `jobs.json`, com captura de contexto (link, empresa, notas do usuário).
 
-![Navegador](img/pagTemplates.png)
+4. **Geração e Adaptação Assistida por LLM**
+   - Seleção de provedores disponíveis (local via Ollama, nuvem mediante configuração). Nenhum tráfego é enviado sem consentimento.
+   - Construção de prompts dinâmicos com base nos dados do perfil e descrição da vaga.
+   - Pós-processamento dos resultados (normalização de bullets, verificação de requisitos) antes de disponibilizar para edição.
 
-Requisitos atendidos
-  - RF-007
-  - RF-005
+5. **Preenchimento Assistido de Formulários**
+   - Utilização do Playwright para navegar até o formulário de candidatura.
+   - Campos são preenchidos de forma automatizada; o usuário pode intervir a qualquer momento.
+   - Quando campos livres demandam resposta personalizada, a UI oferece sugestões geradas pelo LLM para revisão humana.
 
-Artefatos de funcionalidade
-  - template.html
-  - template2.html
-  - template3.html
-  
-![Input](img/input.png)
-  
-Instruções de acesso
-3. Faça o download do arquivo do projeto (ZIP) ou clone do projeto no GitHub;
-4. Descompacte o arquivo em uma pasta específica;
-5. Abra o Visual Studio Code e execute o Live Server;
-6. Abra um navegador de Internet e informe a seguinte URL:
-http://localhost:5500/index.html
+6. **Exportação e Auditoria**
+   - Salvamento de versões finais em múltiplos formatos com histórico vinculado à vaga.
+   - Geração de logs e capturas de tela das automações para auditoria local.
+   - Possibilidade de reabrir execuções anteriores a partir de `runs.json`.
 
+## Requisitos Cobertos
 
-## Instalação e Execução
+- RF-001, RF-002, RF-003, RF-006, RF-007, RF-008.
 
-Opção rápida: abra `src/index.html` diretamente no navegador.
+## Orientações de Execução
 
-Servidor local (recomendado): sirva a pasta `src` com um servidor HTTP estático.
+1. Crie e ative um ambiente virtual Python.
+2. Instale dependências (FastAPI opcional, Playwright com `playwright install --with-deps webkit`).
+3. Configure o arquivo `.env` com as chaves de LLM desejadas.
+4. Inicie o aplicativo via `python -m cvapply.app` (executa a UI Tkinter) e acompanhe o navegador WebKit aberto automaticamente.
 
-Exemplos:
+## Troubleshooting Inicial
 
-```
-# Python 3
-python -m http.server -d src 5500
-
-# Node (npx serve)
-npx serve src -l 5500
-```
-
-Acesse: http://localhost:5500
-
-## FAQ / Troubleshooting
-
-- Página não carrega estilos? Verifique caminhos relativos para `styles/` e `images/`.
-- Exportação para PDF sem formatação: use a opção de “Imprimir como PDF” do navegador e habilite “Gráficos de fundo”.
-- Porta já em uso (5500): escolha outra porta livre (ex.: 8080).
+- **Playwright não encontra o WebKit**: execute `playwright install webkit` novamente e verifique permissões do SO.
+- **Variáveis de ambiente ausentes**: confirme o `.env` e reinicie a aplicação para recarregar as configurações.
+- **Arquivos JSON corrompidos**: utilize o backup incremental gerado em `data/backups/` para restaurar o estado.

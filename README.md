@@ -40,6 +40,23 @@ Tambem ha orientacoes especificas em `src/README.md` (uso do site) e `presentati
 
 ## Como Executar
 
+1. Crie (opcional, mas recomendado) um ambiente virtual e instale as dependências:
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate  # Windows: .venv\\Scripts\\activate
+   python -m pip install --upgrade pip
+   python -m pip install -r requirements.txt
+   ```
+2. Instale o runtime do Playwright para o WebKit (necessário apenas na primeira execução):
+   ```bash
+   playwright install webkit
+   ```
+3. Inicie a interface nativa:
+   ```bash
+   python -m src.main
+   ```
+
+Na primeira execução, o aplicativo abrirá uma janela do navegador WebKit em modo visual para que você realize o login manualmente. Após confirmar o login na interface nativa, o perfil persistente ficará salvo em `storage/webkit_profile`, permitindo reutilizar a sessão nas execuções seguintes.
 
 ## Estrutura do Repositorio
 
