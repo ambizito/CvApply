@@ -11,33 +11,28 @@ As tabelas que se seguem apresentam os requisitos funcionais e não funcionais q
 
 |ID    | Descrição do Requisito  | Prioridade |
 |------|------------------------------------------------------------------------------------|----|
-|RF-001| A aplicação deverá permitir o download do “CV em diferentes formatos, pdf, txt...” | ALTA | 
+|RF-001| A aplicação deverá permitir o download do “CV em diferentes formatos, pdf, txt...” | ALTA |
 |RF-002| A aplicação deve ser capaz de salvar meus dados.                                   | MÉDIA |
-|RF-003| A aplicação deve possuir um tópico de dicas de como montar um CV.                  | BAIXA | 
-|RF-006| A aplicação deve possuir layouts predefinidos e a opção de personalização.         | ALTA | 
+|RF-003| A aplicação deve possuir um tópico de dicas de como montar um CV.                  | BAIXA |
+|RF-006| A aplicação deve possuir layouts predefinidos e a opção de personalização.         | ALTA |
 |RF-007| A aplicação deve ter páginas de fácil navegação, para facilitar correções,         | MÉDIA |
 |      | caso seja necessário                                                               |      |
+|RF-008| A aplicação deve identificar quando um CAPTCHA aparecer e solicitar ao usuário     | ALTA |
+|      | que o resolva antes de prosseguir.                                                 |      |
 
 
 ### Requisitos não Funcionais
 
 |ID     | Descrição do Requisito  |Prioridade |
 |-------|-------------------------------------------------------------------|----|
-|RNF-001| A aplicação deve responder aos comandos em menos de 1 segundo.  | ALTA | 
-|RNF-002| A aplicação deve comportar uma total de 100 usuários simultâneos| BAIXA |
-|       | sem sofrer com instabilidades, a partir da 100ª requisição, o   |       |
-|       | sistema deverá ignorá-las para não sofrer com degradações.      |       |
-|RNF-003| A aplicação deve ser capaz de funcionar usando no máximo 25% do | ALTA | 
-|       | processador.                                                    |      |
+|RNF-001| A aplicação deve responder aos comandos em menos de 1 segundo.  | ALTA |
 |RNF-004| A aplicação deve se recuperar de falhas em 1 segundo e ser      | BAIXA |
 |       | passível de atualizações e correções em 2 ou 3 semanas.         |       |
-|RNF-005| A aplicação deverá ser capaz de concluir a tarefa em no máximo  | ALTA | 
+|RNF-005| A aplicação deverá ser capaz de concluir a tarefa em no máximo  | ALTA |
 |       | 1 minuto.                                                       |      |
-|RNF-006| A aplicação deve ser leve e otimizada para máquinas mais simples| ALTA |
 |RNF-007| A aplicação deve ter um layout simples, moderno e de fácil      | ALTA |
 |RNF-008| A aplicação deverá ser ágil, versátil e sem travamentos.        | ALTA |
-|RNF-009| A aplicação deve ser responsiva, para celular e tablet          | MÉDIA |
- 
+
 
 ## Restrições
 
@@ -57,7 +52,7 @@ O projeto está restrito pelos itens apresentados na tabela a seguir.
 - Edição com diffs e versionamento por vaga; exportação em PDF/DOCX/HTML/Markdown.
 - “Um clique” para abrir/preencher candidatura (quando possível), com confirmações humanas.
 - Suporte multi‑LLM (OpenAI/Azure/Anthropic/Local via Ollama) com fallback configurável.
-- Armazenamento local (sem banco) em JSON/YAML.
+- Armazenamento local em JSON.
 
 ## Modos de Interface
 
