@@ -14,6 +14,16 @@ class SessionStatus:
     initialized: bool
     profile_dir: Path
     login_url: Optional[str] = None
+    has_credentials: bool = False
+    email: Optional[str] = None
+
+
+@dataclass(slots=True)
+class Credentials:
+    """Representa um par email/senha armazenado no .env."""
+
+    email: str
+    password: str
 
 
 class SessionManager:
@@ -21,6 +31,8 @@ class SessionManager:
 
     ENV_PROFILE_FLAG = "PROFILE_INITIALIZED"
     ENV_LOGIN_URL = "LOGIN_URL"
+    ENV_EMAIL = "LINKEDIN_EMAIL"
+    ENV_PASSWORD = "LINKEDIN_PASSWORD"
 
     def __init__(self, project_root: Path) -> None:
         self.project_root = project_root
@@ -31,13 +43,21 @@ class SessionManager:
 
     def status(self) -> SessionStatus:
         values = dotenv_values(self.env_path) if self.env_path.exists() else {}
+        values = {key: value for key, value in (values or {}).items() if value is not None}
         initialized = (
             values.get(self.ENV_PROFILE_FLAG, "false").lower() == "true"
             and self.profile_dir.exists()
             and any(self.profile_dir.iterdir())
         )
+        credentials = self._read_credentials(values)
         login_url = values.get(self.ENV_LOGIN_URL) if initialized else None
-        return SessionStatus(initialized=initialized, profile_dir=self.profile_dir, login_url=login_url)
+        return SessionStatus(
+            initialized=initialized,
+            profile_dir=self.profile_dir,
+            login_url=login_url,
+            has_credentials=credentials is not None,
+            email=credentials.email if credentials else None,
+        )
 
     def mark_initialized(self, login_url: str | None = None) -> None:
         """Persist a flag in the .env file indicating the onboarding has finished."""
@@ -52,6 +72,28 @@ class SessionManager:
         set_key(str(self.env_path), self.ENV_PROFILE_FLAG, "true")
         if login_url:
             set_key(str(self.env_path), self.ENV_LOGIN_URL, login_url)
+
+    def save_credentials(self, email: str, password: str) -> Credentials:
+        """Persist LinkedIn credentials in the .env file."""
+
+        email = email.strip()
+        if not self.env_path.exists():
+            self.env_path.write_text("", encoding="utf-8")
+
+        set_key(str(self.env_path), self.ENV_EMAIL, email)
+        set_key(str(self.env_path), self.ENV_PASSWORD, password)
+        return Credentials(email=email, password=password)
+
+    def get_credentials(self) -> Optional[Credentials]:
+        values = dotenv_values(self.env_path) if self.env_path.exists() else {}
+        return self._read_credentials(values)
+
+    def _read_credentials(self, values: dict[str, Optional[str]]) -> Optional[Credentials]:
+        email = values.get(self.ENV_EMAIL)
+        password = values.get(self.ENV_PASSWORD)
+        if not email or not password:
+            return None
+        return Credentials(email=email, password=password)
 
     def reset(self) -> None:
         """Remove profile data and reset env flags (useful for troubleshooting)."""
@@ -72,7 +114,8 @@ class SessionManager:
             current = {
                 key: value
                 for key, value in dotenv_values(self.env_path).items()
-                if key not in {self.ENV_PROFILE_FLAG, self.ENV_LOGIN_URL}
+                if key
+                not in {self.ENV_PROFILE_FLAG, self.ENV_LOGIN_URL, self.ENV_EMAIL, self.ENV_PASSWORD}
             }
             lines = [f"{key}={value}" for key, value in current.items()]
             self.env_path.write_text("\n".join(lines), encoding="utf-8")

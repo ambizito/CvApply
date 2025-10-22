@@ -4,7 +4,9 @@ Este documento descreve, em alto nível, como a interface da aplicação CvApply
 
 ## User Flow
 
-- Descrever o fluxo de telas e as acoes principais do usuario.
+- Fluxo inicial: tela de pré-verificações com lista de testes (internet, LinkedIn, credenciais) e ação para repetir em caso de falha.
+- Primeira execução: formulário modal para captura de email/senha do LinkedIn seguido da criação do perfil Playwright/WebKit.
+- Execuções subsequentes: tentativa automática de login e redirecionamento para a Home após sucesso.
 - Incluir um diagrama de fluxo quando estiver definido.
 
 ## Wireframes

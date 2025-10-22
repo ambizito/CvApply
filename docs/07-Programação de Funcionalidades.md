@@ -4,12 +4,15 @@ Esta seção descreve as funcionalidades planejadas para o CvApply considerando 
 
 ## Visão Geral do Fluxo
 
-1. **Inicialização**
+1. **Inicialização e Pré-verificações**
+   - Execução de testes automatizados de ambiente (conectividade geral, acesso ao LinkedIn, presença e validade de credenciais) via módulo `system_checks`.
    - Leitura de arquivos JSON (`profiles.json`, `jobs.json`, `runs.json`, `settings.json`).
    - Carregamento do `.env` para chaves de LLM e parâmetros de scraping.
    - Sincronização da UI com o estado persistido (últimos perfis e vagas acessadas).
 
-2. **Gestão de Perfil e Currículo**
+2. **Onboarding e Gestão de Perfil**
+   - Coleta inicial de email e senha do LinkedIn quando o usuário abre o app pela primeira vez, com persistência local cifrada pelo `SessionManager`.
+   - Onboarding assistido para criação do perfil Playwright/WebKit e tentativa de login automática nas execuções subsequentes.
    - Formulários Tkinter/ttk para dados pessoais, experiências, habilidades e idiomas.
    - Validação imediata (campos obrigatórios, limites de caracteres) e salvamento incremental no JSON.
    - Geração de versões de currículo baseadas em templates (PDF/DOCX/HTML/Markdown) com revisão visual.
@@ -51,3 +54,4 @@ Esta seção descreve as funcionalidades planejadas para o CvApply considerando 
 - **Playwright não encontra o WebKit**: execute `playwright install webkit` novamente e verifique permissões do SO.
 - **Variáveis de ambiente ausentes**: confirme o `.env` e reinicie a aplicação para recarregar as configurações.
 - **Arquivos JSON corrompidos**: utilize o backup incremental gerado em `data/backups/` para restaurar o estado.
+- **Falha nas verificações prévias**: corrija a conexão com a internet, confira o status do LinkedIn e edite/salva novamente as credenciais pelo menu de configurações antes de reiniciar o fluxo.
