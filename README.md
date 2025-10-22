@@ -43,15 +43,10 @@ Tambem ha orientacoes especificas em `src/README.md` (uso do site) e `presentati
 
 ## Estrutura do Repositorio
 
-- `docs/` - documentacao do projeto por secoes
-- `src/` - codigo-fonte do site (HTML/CSS/JS e assets)
-- `presentation/` - materiais de apresentacao
-- `README.md` - indice principal com links para as secoes em `docs`
 
 ---
 
 ## Contribuicao e Licenca
 
 - Contribuicoes sao bem-vindas via pull requests.
-- Licenca sugerida: Apache-2.0 (ajuste se necessario).
-
+- Licenca sugerida: Apache-2.0 
