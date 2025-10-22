@@ -26,6 +26,22 @@ class PlaywrightController:
         self._playwright: Optional[Playwright] = None
         self._context: Optional[BrowserContext] = None
         self._lock = threading.Lock()
+        # Instala automaticamente o WebKit se necessário
+        self._ensure_webkit_installed()
+
+    def _ensure_webkit_installed(self):
+        import subprocess, sys
+        try:
+            # Tenta importar o runtime do WebKit
+            from playwright._impl._driver import get_driver_dir
+            import os
+            driver_dir = get_driver_dir()
+            webkit_path = os.path.join(driver_dir, 'webkit')
+            if not os.path.exists(webkit_path):
+                subprocess.run([sys.executable, '-m', 'playwright', 'install', 'webkit'], check=True)
+        except Exception:
+            # Se falhar, tenta instalar mesmo assim
+            subprocess.run([sys.executable, '-m', 'playwright', 'install', 'webkit'], check=True)
 
     def _run_loop(self) -> None:
         asyncio.set_event_loop(self._loop)
