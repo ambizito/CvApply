@@ -107,7 +107,6 @@ class HomeScreen(BaseScreen):
             wrap="word",
             state="disabled",
             relief="flat",
-            bg=self.cget("background"),
         )
         self.profile_text.pack(fill=tk.BOTH, expand=True)
 
