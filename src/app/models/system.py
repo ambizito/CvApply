@@ -9,7 +9,7 @@ import requests
 from requests import Response
 from requests.exceptions import RequestException
 
-from .session_manager import Credentials, SessionManager
+from .session import Credentials, SessionManager
 
 
 LOGGER = logging.getLogger(__name__)
@@ -165,12 +165,14 @@ class SystemTestRunner:
         self._session_manager = session_manager
 
     def get_checks(self) -> List[SystemCheck]:
-        return [
+        checks: List[SystemCheck] = [
             InternetConnectivityCheck(),
             LinkedInAccessCheck(),
             CredentialsExistCheck(self._session_manager),
-            CredentialsValidityCheck(self._session_manager),
         ]
+        if self._session_manager.get_credentials() is not None:
+            checks.append(CredentialsValidityCheck(self._session_manager))
+        return checks
 
     def run_checks(self) -> Iterable[SystemCheckResult]:
         for check in self.get_checks():

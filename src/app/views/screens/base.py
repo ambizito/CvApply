@@ -4,8 +4,8 @@ from __future__ import annotations
 import tkinter as tk
 from tkinter import messagebox, ttk
 
-from ..navigation import AppState, NavigationController
-from ..ui_vars import UITokens
+from ...controllers.navigation import AppState, NavigationController
+from ..theme import UITokens
 
 
 class BaseScreen(ttk.Frame):

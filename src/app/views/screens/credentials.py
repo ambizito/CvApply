@@ -6,7 +6,7 @@ from typing import Callable
 
 from tkinter import ttk
 
-from ..session_manager import SessionManager
+from ...controllers.login import LinkedInLoginController
 from .base import BaseScreen
 
 
@@ -19,12 +19,12 @@ class CredentialsScreen(BaseScreen):
         router,
         app_state,
         tokens,
-        session_manager: SessionManager,
+        login_controller: LinkedInLoginController,
         *,
         on_saved: Callable[[], None],
     ) -> None:
         super().__init__(parent, router, app_state, tokens)
-        self.session_manager = session_manager
+        self.login_controller = login_controller
         self.on_saved = on_saved
         self.email_var = tk.StringVar()
         self.password_var = tk.StringVar()
@@ -74,6 +74,6 @@ class CredentialsScreen(BaseScreen):
             self.show_message("Senha inválida", "A senha precisa ter pelo menos 8 caracteres.", error=True)
             return
 
-        self.session_manager.save_credentials(email, password)
+        self.login_controller.save_credentials(email, password)
         self.show_message("Credenciais salvas", "As credenciais foram armazenadas com sucesso.")
         self.on_saved()

@@ -1,14 +1,20 @@
-"""Navigation primitives for the Tkinter application."""
+"""Navigation primitives that wire controllers to Tkinter views."""
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, Optional, Protocol
+from typing import Dict, Optional, Protocol, TYPE_CHECKING
 
 import tkinter as tk
 from tkinter import ttk
 
-from .session_manager import SessionStatus
-from .ui_vars import UITokens
+if TYPE_CHECKING:  # pragma: no cover - imported for typing only
+    from ..models.session import SessionStatus
+    from ..views.screens.base import BaseScreen
+    from ..views.theme import UITokens
+else:  # pragma: no cover - fallback runtime aliases
+    SessionStatus = object  # type: ignore[misc,assignment]
+    BaseScreen = tk.Widget  # type: ignore[assignment]
+    UITokens = object
 
 
 class ScreenFactory(Protocol):
@@ -28,10 +34,10 @@ class ScreenFactory(Protocol):
 class AppState:
     """Shared application state injected into screens."""
 
-    session_status: SessionStatus
+    session_status: "SessionStatus"
     current_user: Optional[str] = None
 
-    def update_status(self, status: SessionStatus) -> None:
+    def update_status(self, status: "SessionStatus") -> None:
         """Update the tracked session status and user information."""
 
         self.session_status = status
@@ -87,4 +93,4 @@ class NavigationController:
         return self._current
 
 
-from .screens.base import BaseScreen  # noqa: E402  # isort:skip
+__all__ = ["AppState", "NavigationController"]

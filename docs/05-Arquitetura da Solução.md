@@ -27,12 +27,21 @@ A arquitetura do CvApply prioriza execução 100% local. Um serviço Python coor
 
 ## Camadas e Adapters
 
+### Organização em MVC
+
+O código-fonte foi reorganizado segundo o padrão Modelo-Visão-Controlador (MVC).
+- **Models (`src/app/models`)** concentram gestão de sessão, credenciais e verificações de ambiente.
+- **Controllers (`src/app/controllers`)** orquestram a automação do navegador, o login no LinkedIn e a navegação entre telas.
+- **Views (`src/app/views`)** agrupam a aplicação Tkinter, estilos e telas modulares.
+
+Essa separação facilita testes unitários, evolução incremental e reutilização dos serviços de automação sem acoplamento direto à camada de interface.
+
 1. **UI Layer**: janelas Tkinter/ttk para pré-verificação do ambiente, onboarding de credenciais, perfil, análise de vagas, geração e exportação. Comunica-se com o orquestrador via chamadas diretas ou API local.
 2. **Core Services**:
    - `profiles`: ingestão, deduplicação e normalização dos dados de currículo.
    - `jobs`: busca, scraping e monitoramento de vagas, reutilizando Playwright para navegação assistida.
    - `generation`: composição de prompts, chamada a LLMs e pós-processamento dos documentos.
-   - `system_checks`: biblioteca com verificações de conectividade HTTP, disponibilidade do LinkedIn e integridade das credenciais armazenadas.
+   - `models.system`: biblioteca com verificações de conectividade HTTP, disponibilidade do LinkedIn e integridade das credenciais armazenadas.
 3. **Automation Adapter**: camada que encapsula Playwright, detecta mudanças de DOM, sinais de CAPTCHA e disponibiliza hooks para a UI.
 4. **Persistence Adapter**: abstrai leitura/escrita em JSON, garantindo bloqueio de arquivo e backups incrementais.
 5. **Integration Adapter**: gerencia conectores de LLM e fallback local.

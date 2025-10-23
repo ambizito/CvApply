@@ -5,26 +5,28 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import ttk
 
-from .navigation import AppState, NavigationController
-from .playwright_controller import PlaywrightController
-from .screens import AutoLoginScreen, CredentialsScreen, HomeScreen, OnboardingScreen, PreflightScreen
-from .session_manager import SessionManager, SessionStatus
-from .system_checks import SystemTestRunner
-from .ui_vars import configure_styles
+from ..controllers.browser import LinkedInBrowserController
+from ..controllers.login import LinkedInLoginController
+from ..controllers.navigation import AppState, NavigationController
+from ..models.session import SessionManager, SessionStatus
+from ..models.system import SystemTestRunner
+from ..views.screens import AutoLoginScreen, CredentialsScreen, HomeScreen, PreflightScreen
+from ..views.theme import configure_styles
 
 
 class Application(tk.Tk):
-    """Tkinter application that orchestrates onboarding and validation flows."""
+    """Tkinter application that orchestrates environment checks and login flows."""
 
     def __init__(self, project_root: Path) -> None:
         super().__init__()
-        self.title("CvApply - Onboarding")
+        self.title("CvApply - Automação LinkedIn")
         self.geometry("720x520")
         self.resizable(False, False)
 
         self.session_manager = SessionManager(project_root)
         initial_status = self.session_manager.status()
-        self.controller = PlaywrightController(initial_status.profile_dir)
+        self.browser = LinkedInBrowserController(initial_status.profile_dir)
+        self.login_controller = LinkedInLoginController(self.browser, self.session_manager)
         self.test_runner = SystemTestRunner(self.session_manager)
         self._current_status = initial_status
 
@@ -62,20 +64,8 @@ class Application(tk.Tk):
                 router,
                 state,
                 tokens,
-                session_manager=self.session_manager,
+                login_controller=self.login_controller,
                 on_saved=self._on_credentials_saved,
-            ),
-        )
-        self.router.register(
-            "Onboarding",
-            lambda parent, router, state, tokens: OnboardingScreen(
-                parent,
-                router,
-                state,
-                tokens,
-                controller=self.controller,
-                session_manager=self.session_manager,
-                on_initialized=self._on_session_initialized,
             ),
         )
         self.router.register(
@@ -85,7 +75,7 @@ class Application(tk.Tk):
                 router,
                 state,
                 tokens,
-                controller=self.controller,
+                login_controller=self.login_controller,
                 on_completed=self._on_auto_login_completed,
             ),
         )
@@ -109,8 +99,6 @@ class Application(tk.Tk):
         status = self._refresh_status()
         if not status.has_credentials:
             self._show_credentials(status)
-        elif not status.initialized:
-            self._show_onboarding(status)
         else:
             self._show_auto_login(status)
 
@@ -118,11 +106,6 @@ class Application(tk.Tk):
         if status is not None:
             self.app_state.update_status(status)
         self.router.show("Credentials")
-
-    def _show_onboarding(self, status: SessionStatus | None = None) -> None:
-        if status is not None:
-            self.app_state.update_status(status)
-        self.router.show("Onboarding")
 
     def _show_auto_login(self, status: SessionStatus | None = None) -> None:
         if status is not None:
@@ -135,18 +118,15 @@ class Application(tk.Tk):
         self.router.show("Home")
 
     # region events --------------------------------------------------------
-    def _on_session_initialized(self, _event: tk.Event | None = None) -> None:
-        self._show_auto_login(self._refresh_status())
-
     def _on_credentials_saved(self, _event: tk.Event | None = None) -> None:
-        self._show_onboarding(self._refresh_status())
+        self._show_auto_login(self._refresh_status())
 
     def _on_auto_login_completed(self, _event: tk.Event | None = None) -> None:
         self._show_home(self._refresh_status())
 
     def _on_close(self) -> None:
         try:
-            self.controller.shutdown()
+            self.browser.shutdown()
         finally:
             self.destroy()
 

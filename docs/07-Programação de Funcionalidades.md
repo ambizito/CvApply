@@ -5,14 +5,14 @@ Esta seção descreve as funcionalidades planejadas para o CvApply considerando 
 ## Visão Geral do Fluxo
 
 1. **Inicialização e Pré-verificações**
-   - Execução de testes automatizados de ambiente (conectividade geral, acesso ao LinkedIn, presença e validade de credenciais) via módulo `system_checks`.
+   - Execução de testes automatizados de ambiente (conectividade geral, acesso ao LinkedIn, presença e validade de credenciais) via módulo `models.system`.
    - Leitura de arquivos JSON (`profiles.json`, `jobs.json`, `runs.json`, `settings.json`).
    - Carregamento do `.env` para chaves de LLM e parâmetros de scraping.
    - Sincronização da UI com o estado persistido (últimos perfis e vagas acessadas).
 
-2. **Onboarding e Gestão de Perfil**
+2. **Credenciais e Gestão de Perfil**
    - Coleta inicial de email e senha do LinkedIn quando o usuário abre o app pela primeira vez, com persistência local cifrada pelo `SessionManager`.
-   - Onboarding assistido para criação do perfil Playwright/WebKit e tentativa de login automática nas execuções subsequentes.
+   - Automação de primeiro acesso com Playwright para criação do perfil WebKit e reaproveitamento da sessão em execuções futuras.
    - Formulários Tkinter/ttk para dados pessoais, experiências, habilidades e idiomas.
    - Validação imediata (campos obrigatórios, limites de caracteres) e salvamento incremental no JSON.
    - Geração de versões de currículo baseadas em templates (PDF/DOCX/HTML/Markdown) com revisão visual.

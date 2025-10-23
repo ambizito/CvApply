@@ -3,11 +3,11 @@ from __future__ import annotations
 
 import threading
 import tkinter as tk
-from typing import Callable
+from typing import Callable, Optional
 
 from tkinter import ttk
 
-from ..playwright_controller import PlaywrightController
+from ...controllers.login import LinkedInLoginController
 from .base import BaseScreen
 
 
@@ -20,12 +20,12 @@ class AutoLoginScreen(BaseScreen):
         router,
         app_state,
         tokens,
-        controller: PlaywrightController,
+        login_controller: LinkedInLoginController,
         *,
         on_completed: Callable[[], None],
     ) -> None:
         super().__init__(parent, router, app_state, tokens)
-        self.controller = controller
+        self.login_controller = login_controller
         self.on_completed = on_completed
         self._is_running = False
 
@@ -34,7 +34,9 @@ class AutoLoginScreen(BaseScreen):
             anchor=tk.W, pady=(0, self.tokens.spacing.inline)
         )
 
-        description = "Vamos reutilizar a sessão salva para abrir diretamente a página inicial do LinkedIn."
+        description = (
+            "Vamos reutilizar a sessão salva ou realizar o primeiro acesso automaticamente ao LinkedIn."
+        )
         ttk.Label(self, text=description, wraplength=620, justify=tk.LEFT).pack(anchor=tk.W)
 
         self.status_var = tk.StringVar(value="Iniciando login automático...")
@@ -52,27 +54,44 @@ class AutoLoginScreen(BaseScreen):
     def _start_login(self) -> None:
         if self._is_running:
             return
+
+        credentials = self.login_controller.get_credentials()
+        if credentials is None:
+            self.status_var.set("Credenciais não cadastradas. Cadastre-as antes de continuar.")
+            self.retry_button.config(state=tk.DISABLED)
+            return
+
         self._is_running = True
         self.retry_button.config(state=tk.DISABLED)
-        self.status_var.set("Abrindo o LinkedIn com as credenciais salvas...")
 
         status = self.app_state.session_status
-        home_url = status.login_url or "https://www.linkedin.com/feed/"
-        future = self.controller.open_login(home_url)
+        first_login = not status.initialized
+
+        if first_login:
+            self.status_var.set("Realizando login inicial no LinkedIn...")
+            future = self.login_controller.login_with_credentials(credentials)
+        else:
+            self.status_var.set("Reutilizando sessão salva do LinkedIn...")
+            future = self.login_controller.open_home(status.login_url)
 
         def _worker() -> None:
             try:
-                future.result()
+                result = future.result()
             except Exception as exc:  # noqa: BLE001
                 self.after(0, lambda: self._on_failure(exc))
             else:
-                self.after(0, self._on_success)
+                self.after(0, lambda: self._on_success(result, first_login))
 
         threading.Thread(target=_worker, daemon=True).start()
 
-    def _on_success(self) -> None:
+    def _on_success(self, result: Optional[str], first_login: bool) -> None:
         self._is_running = False
-        self.status_var.set("Login automático concluído. O navegador está na página inicial do LinkedIn.")
+        if first_login:
+            self.login_controller.mark_initialized(result if isinstance(result, str) else None)
+            self.app_state.update_status(self.login_controller.status())
+            self.status_var.set("Login inicial concluído e sessão salva. O LinkedIn está aberto.")
+        else:
+            self.status_var.set("Sessão reutilizada com sucesso. O LinkedIn está aberto.")
         self.on_completed()
 
     def _on_failure(self, exc: Exception) -> None:

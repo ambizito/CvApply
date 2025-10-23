@@ -7,7 +7,7 @@ from typing import Callable, List
 
 from tkinter import ttk
 
-from ..system_checks import SystemCheckResult, SystemTestRunner
+from ...models.system import SystemCheckResult, SystemTestRunner
 from .base import BaseScreen
 
 
