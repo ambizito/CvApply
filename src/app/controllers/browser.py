@@ -5,15 +5,19 @@ import asyncio
 import threading
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Optional
+from typing import Awaitable, Callable, Optional, TypeVar
 
 from playwright.async_api import (
     BrowserContext,
     Error as PlaywrightError,
     Playwright,
     TimeoutError as PlaywrightTimeoutError,
+    Page,
     async_playwright,
 )
+
+
+T = TypeVar("T")
 
 
 class LinkedInBrowserController:
@@ -94,6 +98,19 @@ class LinkedInBrowserController:
             context = await self._ensure_context(headless=False)
             page = context.pages[0] if context.pages else await context.new_page()
             await page.goto(url, wait_until="domcontentloaded")
+
+    def run_with_page(self, handler: Callable[[Page], Awaitable[T]]) -> asyncio.Future[T]:
+        """Execute a coroutine with exclusive access to the current page."""
+
+        if not self._ensure_loop_ready():
+            raise RuntimeError("O controlador do Playwright já foi finalizado.")
+        return asyncio.run_coroutine_threadsafe(self._run_with_page(handler), self._loop)
+
+    async def _run_with_page(self, handler: Callable[[Page], Awaitable[T]]) -> T:
+        async with self._context_lock():
+            context = await self._ensure_context(headless=False)
+            page = context.pages[0] if context.pages else await context.new_page()
+            return await handler(page)
 
     def login_with_credentials(self, email: str, password: str) -> asyncio.Future:
         """Execute the LinkedIn login flow considering the dynamic homepage layout."""
