@@ -5,9 +5,11 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import ttk
 
+from ..controllers import LinkedInActionsController
 from ..controllers.browser import LinkedInBrowserController
 from ..controllers.login import LinkedInLoginController
 from ..controllers.navigation import AppState, NavigationController
+from ..models.scrap_user import ScrapUserRepository
 from ..models.session import SessionManager, SessionStatus
 from ..models.system import SystemTestRunner
 from ..views.screens import AutoLoginScreen, CredentialsScreen, HomeScreen, PreflightScreen
@@ -27,6 +29,8 @@ class Application(tk.Tk):
         initial_status = self.session_manager.status()
         self.browser = LinkedInBrowserController(initial_status.profile_dir)
         self.login_controller = LinkedInLoginController(self.browser, self.session_manager)
+        self.scrap_repository = ScrapUserRepository(self.session_manager.storage_dir)
+        self.actions_controller = LinkedInActionsController(self.browser, self.scrap_repository)
         self.test_runner = SystemTestRunner(self.session_manager)
         self._current_status = initial_status
 
@@ -81,7 +85,14 @@ class Application(tk.Tk):
         )
         self.router.register(
             "Home",
-            lambda parent, router, state, tokens: HomeScreen(parent, router, state, tokens),
+            lambda parent, router, state, tokens: HomeScreen(
+                parent,
+                router,
+                state,
+                tokens,
+                actions_controller=self.actions_controller,
+                scrap_repository=self.scrap_repository,
+            ),
         )
 
     # region state helpers -------------------------------------------------

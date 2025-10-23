@@ -1,5 +1,6 @@
 """Domain models encapsulating session management and system checks."""
 
+from .scrap_user import ExperienceRecord, ScrapUserRepository
 from .session import Credentials, SessionManager, SessionStatus
 from .system import (
     CredentialsExistCheck,
@@ -13,10 +14,12 @@ from .system import (
 
 __all__ = [
     "Credentials",
+    "ExperienceRecord",
     "CredentialsExistCheck",
     "CredentialsValidityCheck",
     "InternetConnectivityCheck",
     "LinkedInAccessCheck",
+    "ScrapUserRepository",
     "SessionManager",
     "SessionStatus",
     "SystemCheck",
