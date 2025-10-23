@@ -1,13 +1,11 @@
-from __future__ import annotations
-
 from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
 from requests.exceptions import RequestException
 
-from src.app.session_manager import SessionManager
-from src.app.system_checks import (
+from src.app.models.session import SessionManager
+from src.app.models.system import (
     CredentialsExistCheck,
     CredentialsValidityCheck,
     InternetConnectivityCheck,
@@ -30,7 +28,7 @@ def test_internet_connectivity_check_success(monkeypatch):
     check = InternetConnectivityCheck()
 
     mock_response = DummyResponse(status_code=200, text="<html>Google</html>")
-    monkeypatch.setattr("src.app.system_checks.requests.get", lambda *args, **kwargs: mock_response)
+    monkeypatch.setattr("src.app.models.system.requests.get", lambda *args, **kwargs: mock_response)
 
     result = check.run()
     assert result.success
@@ -49,8 +47,8 @@ def test_linkedin_access_check_retries_until_success(monkeypatch):
         call = responses.pop(0)
         return call()
 
-    monkeypatch.setattr("src.app.system_checks.requests.get", fake_get)
-    monkeypatch.setattr("src.app.system_checks.time.sleep", lambda *args, **kwargs: None)
+    monkeypatch.setattr("src.app.models.system.requests.get", fake_get)
+    monkeypatch.setattr("src.app.models.system.time.sleep", lambda *args, **kwargs: None)
 
     result = check.run()
     assert result.success
@@ -61,10 +59,10 @@ def test_linkedin_access_check_failure(monkeypatch):
     check = LinkedInAccessCheck(retries=2, delay_seconds=0)
 
     monkeypatch.setattr(
-        "src.app.system_checks.requests.get",
+        "src.app.models.system.requests.get",
         Mock(side_effect=RequestException("Falha permanente")),
     )
-    monkeypatch.setattr("src.app.system_checks.time.sleep", lambda *args, **kwargs: None)
+    monkeypatch.setattr("src.app.models.system.time.sleep", lambda *args, **kwargs: None)
 
     result = check.run()
     assert not result.success

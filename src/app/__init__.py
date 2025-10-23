@@ -1,13 +1,6 @@
+"""Application package exposing the Tkinter entry point."""
 from __future__ import annotations
 
-from typing import Any
+from .views.application import Application
 
 __all__ = ["Application"]
-
-
-def __getattr__(name: str) -> Any:  # pragma: no cover - thin wrapper
-    if name == "Application":
-        from .gui import Application as _Application
-
-        return _Application
-    raise AttributeError(name)
