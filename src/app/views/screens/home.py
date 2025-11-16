@@ -117,15 +117,10 @@ class HomeScreen(BaseScreen):
         self.bind("<Configure>", self._on_resize)
 
     def on_show(self, **params: object) -> None:
-        email_display = self.app_state.session_status.email or "usuário"
-        message = (
-            f"Bem-vindo(a), {email_display}! Se o navegador estiver aberto com sua conta, você já pode continuar "
-            "as próximas etapas do CvApply."
-        )
-        self.message_label.config(text=message)
         self.status_var.set("")
-        self._refresh_profile_summary()
         self._ensure_profile_data()
+        self._update_welcome_message()
+        self._refresh_profile_summary()
 
     # -- LinkedIn automations ---------------------------------------------
     def _open_jobs_page(self) -> None:
@@ -177,6 +172,7 @@ class HomeScreen(BaseScreen):
     def _on_action_success(self, message: str) -> None:
         self._auto_scan_started = False
         self.status_var.set(message)
+        self._update_welcome_message()
         self._refresh_profile_summary()
         self.show_message("Automação concluída", message)
 
@@ -212,6 +208,23 @@ class HomeScreen(BaseScreen):
             + f"Formações registradas: {len(formacao)}. "
             + f"Competências registradas: {len(competencias)}."
         )
+
+    def _resolve_user_name(self) -> str:
+        payload = self.scrap_repository.load()
+        nomes = payload.get("Nome", [])
+        if nomes and nomes[0]:
+            return str(nomes[0])
+        if self.app_state.current_user:
+            return self.app_state.current_user
+        return "usuário"
+
+    def _update_welcome_message(self) -> None:
+        user_name = self._resolve_user_name()
+        message = (
+            f"Bem-vindo(a), {user_name}! Se o navegador estiver aberto com sua conta, você já pode continuar "
+            "as próximas etapas do CvApply."
+        )
+        self.message_label.config(text=message)
 
     def _refresh_profile_summary(self) -> None:
         if self.profile_text is None:
