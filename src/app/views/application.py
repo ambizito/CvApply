@@ -10,9 +10,16 @@ from ..controllers.browser import LinkedInBrowserController
 from ..controllers.login import LinkedInLoginController
 from ..controllers.navigation import AppState, NavigationController
 from ..models.scrap_user import ScrapUserRepository
+from ..models.search_preferences import SearchPreferencesRepository
 from ..models.session import SessionManager, SessionStatus
 from ..models.system import SystemTestRunner
-from ..views.screens import AutoLoginScreen, CredentialsScreen, HomeScreen, PreflightScreen
+from ..views.screens import (
+    AutoLoginScreen,
+    CredentialsScreen,
+    HomeScreen,
+    PreflightScreen,
+    SearchPreferencesScreen,
+)
 from ..views.theme import configure_styles
 
 
@@ -30,6 +37,7 @@ class Application(tk.Tk):
         self.browser = LinkedInBrowserController(initial_status.profile_dir)
         self.login_controller = LinkedInLoginController(self.browser, self.session_manager)
         self.scrap_repository = ScrapUserRepository(self.session_manager.storage_dir)
+        self.search_preferences = SearchPreferencesRepository(self.session_manager.storage_dir)
         self.actions_controller = LinkedInActionsController(self.browser, self.scrap_repository)
         self.test_runner = SystemTestRunner(self.session_manager)
         self._current_status = initial_status
@@ -92,6 +100,16 @@ class Application(tk.Tk):
                 tokens,
                 actions_controller=self.actions_controller,
                 scrap_repository=self.scrap_repository,
+            ),
+        )
+        self.router.register(
+            "JobPreferences",
+            lambda parent, router, state, tokens: SearchPreferencesScreen(
+                parent,
+                router,
+                state,
+                tokens,
+                preferences_repo=self.search_preferences,
             ),
         )
 
