@@ -56,6 +56,12 @@ class HomeScreen(BaseScreen):
 
         ttk.Button(
             self,
+            text="Procurar vagas",
+            command=self._open_job_preferences,
+        ).pack(anchor="w", pady=(self.tokens.spacing.inline, 0))
+
+        ttk.Button(
+            self,
             text="Abrir meu perfil",
             command=self._open_profile_page,
         ).pack(anchor="w", pady=(self.tokens.spacing.inline, 0))
@@ -152,6 +158,9 @@ class HomeScreen(BaseScreen):
             future_factory=self.actions_controller.scan_profile,
             success_message=_format_message,
         )
+
+    def _open_job_preferences(self) -> None:
+        self.router.show("JobPreferences")
 
     # -- placeholders ------------------------------------------------------
     def _compose_cover_letter(self) -> None:
