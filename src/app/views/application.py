@@ -30,7 +30,7 @@ class Application(tk.Tk):
         super().__init__()
         self.title("CvApply - Automação LinkedIn")
         self.geometry("720x520")
-        self.resizable(False, False)
+        self.resizable(True, True)
 
         self.session_manager = SessionManager(project_root)
         initial_status = self.session_manager.status()
