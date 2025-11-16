@@ -13,7 +13,7 @@ from ..models.scrap_user import ExperienceRecord, ScrapUserRepository
 class LinkedInActionsController:
     """Encapsulate LinkedIn navigation flows after the login is complete."""
 
-    JOBS_URL = "https://www.linkedin.com/jobs/?"
+    JOBS_URL = "https://www.linkedin.com/jobs/search/"
     PROFILE_URL_PATTERN = re.compile(r"/in/[^/]+/?")
 
     def __init__(
