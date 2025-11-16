@@ -30,81 +30,79 @@ class HomeScreen(BaseScreen):
         self.scrap_repository = scrap_repository
         self.status_var = tk.StringVar(value="")
         self.profile_text: tk.Text | None = None
+        self.description_label: ttk.Label | None = None
+        self.message_label: ttk.Label | None = None
+        self.status_label: ttk.Label | None = None
+        self._auto_scan_started = False
 
     def build(self) -> None:
-        ttk.Label(self, text="Página inicial", style="Heading.TLabel").pack(
-            anchor="w", pady=(0, self.tokens.spacing.inline)
+        self.columnconfigure(0, weight=1)
+
+        ttk.Label(self, text="Página inicial", style="Heading.TLabel").grid(
+            row=0, column=0, sticky="w", pady=(0, self.tokens.spacing.inline)
         )
 
-        ttk.Label(
+        self.description_label = ttk.Label(
             self,
             text=(
-                "Este painel oferece atalhos para navegar nas vagas, revisar o perfil e, em breve, "
-                "gerar cartas e emails de candidatura."
+                "Este painel oferece atalhos para navegar nas vagas e revisar o perfil. "
+                "O nome do candidato será verificado automaticamente ao iniciar o aplicativo."
             ),
             style="Secondary.TLabel",
-            wraplength=620,
+            wraplength=self._calculate_wraplength(),
             justify="left",
-        ).pack(anchor="w")
+        )
+        self.description_label.grid(row=1, column=0, sticky="we")
+
+        button_frame = ttk.Frame(self)
+        button_frame.grid(row=2, column=0, sticky="w", pady=(self.tokens.spacing.section, 0))
+        button_frame.columnconfigure(0, weight=1)
 
         ttk.Button(
-            self,
+            button_frame,
             text="Abrir página de vagas",
             command=self._open_jobs_page,
             style="Accent.TButton",
-        ).pack(anchor="w", pady=(self.tokens.spacing.section, 0))
+        ).grid(row=0, column=0, sticky="w")
 
         ttk.Button(
-            self,
+            button_frame,
             text="Procurar vagas",
             command=self._open_job_preferences,
-        ).pack(anchor="w", pady=(self.tokens.spacing.inline, 0))
+        ).grid(row=1, column=0, sticky="w", pady=(self.tokens.spacing.inline, 0))
 
         ttk.Button(
-            self,
+            button_frame,
             text="Abrir meu perfil",
             command=self._open_profile_page,
-        ).pack(anchor="w", pady=(self.tokens.spacing.inline, 0))
+        ).grid(row=2, column=0, sticky="w", pady=(self.tokens.spacing.inline, 0))
 
-        ttk.Button(
-            self,
-            text="Executar varredura do meu perfil",
-            command=self._scan_profile,
-        ).pack(anchor="w", pady=(self.tokens.spacing.inline, 0))
-
-        ttk.Button(
-            self,
-            text="Redigir carta de apresentação",
-            command=self._compose_cover_letter,
-        ).pack(anchor="w", pady=(self.tokens.spacing.inline, 0))
-
-        ttk.Button(
-            self,
-            text="Preparar email de candidatura",
-            command=self._draft_application_email,
-        ).pack(anchor="w", pady=(self.tokens.spacing.inline, 0))
-
-        self.message_label = ttk.Label(self, wraplength=620, justify="left", style="Secondary.TLabel")
-        self.message_label.pack(anchor="w", pady=(self.tokens.spacing.section, 0))
+        self.message_label = ttk.Label(
+            self, wraplength=self._calculate_wraplength(), justify="left", style="Secondary.TLabel"
+        )
+        self.message_label.grid(row=3, column=0, sticky="we", pady=(self.tokens.spacing.section, 0))
 
         self.status_label = ttk.Label(
             self,
             textvariable=self.status_var,
-            wraplength=620,
+            wraplength=self._calculate_wraplength(),
             justify="left",
             style="Secondary.TLabel",
         )
-        self.status_label.pack(anchor="w", pady=(self.tokens.spacing.inline, 0))
+        self.status_label.grid(row=4, column=0, sticky="we", pady=(self.tokens.spacing.inline, 0))
 
         profile_frame = ttk.LabelFrame(self, text="Resumo do perfil do candidato")
-        profile_frame.pack(
-            anchor="w",
-            fill=tk.BOTH,
-            expand=False,
+        profile_frame.grid(
+            row=5,
+            column=0,
+            sticky="nsew",
             pady=(self.tokens.spacing.section, 0),
             ipadx=self.tokens.spacing.inline,
             ipady=self.tokens.spacing.inline,
         )
+        self.rowconfigure(5, weight=1)
+        profile_frame.rowconfigure(0, weight=1)
+        profile_frame.columnconfigure(0, weight=1)
 
         self.profile_text = tk.Text(
             profile_frame,
@@ -114,7 +112,9 @@ class HomeScreen(BaseScreen):
             state="disabled",
             relief="flat",
         )
-        self.profile_text.pack(fill=tk.BOTH, expand=True)
+        self.profile_text.grid(row=0, column=0, sticky="nsew")
+
+        self.bind("<Configure>", self._on_resize)
 
     def on_show(self, **params: object) -> None:
         email_display = self.app_state.session_status.email or "usuário"
@@ -125,6 +125,7 @@ class HomeScreen(BaseScreen):
         self.message_label.config(text=message)
         self.status_var.set("")
         self._refresh_profile_summary()
+        self._ensure_profile_data()
 
     # -- LinkedIn automations ---------------------------------------------
     def _open_jobs_page(self) -> None:
@@ -142,38 +143,14 @@ class HomeScreen(BaseScreen):
         )
 
     def _scan_profile(self) -> None:
-        def _format_message(payload: dict[str, list[Any]]) -> str:
-            experiencias = payload.get("Experiência", [])
-            formacao = payload.get("Formação", [])
-            competencias = payload.get("Competências", [])
-            return (
-                "Varredura concluída. "
-                f"Experiências registradas: {len(experiencias)}. "
-                f"Formações registradas: {len(formacao)}. "
-                f"Competências registradas: {len(competencias)}."
-            )
-
         self._run_async_action(
             start_message="Executando varredura completa do perfil...",
             future_factory=self.actions_controller.scan_profile,
-            success_message=_format_message,
+            success_message=self._format_scan_message,
         )
 
     def _open_job_preferences(self) -> None:
         self.router.show("JobPreferences")
-
-    # -- placeholders ------------------------------------------------------
-    def _compose_cover_letter(self) -> None:
-        self.show_message(
-            "Em desenvolvimento",
-            "A redação assistida de cartas de apresentação será adicionada futuramente.",
-        )
-
-    def _draft_application_email(self) -> None:
-        self.show_message(
-            "Em desenvolvimento",
-            "O assistente para montar emails de candidatura será implementado nas próximas etapas.",
-        )
 
     # -- async helpers -----------------------------------------------------
     def _run_async_action(
@@ -198,14 +175,43 @@ class HomeScreen(BaseScreen):
         threading.Thread(target=_worker, daemon=True).start()
 
     def _on_action_success(self, message: str) -> None:
+        self._auto_scan_started = False
         self.status_var.set(message)
         self._refresh_profile_summary()
         self.show_message("Automação concluída", message)
 
     def _on_action_error(self, exc: Exception) -> None:
+        self._auto_scan_started = False
         message = f"Falha ao executar a automação: {exc}"
         self.status_var.set(message)
         self.show_message("Erro na automação", message, error=True)
+
+    def _ensure_profile_data(self) -> None:
+        if self._auto_scan_started:
+            return
+        payload = self.scrap_repository.load()
+        nome = payload.get("Nome", [])
+        if nome and any(nome):
+            return
+
+        self._auto_scan_started = True
+        self._run_async_action(
+            start_message="Verificando perfil para identificar seu nome...",
+            future_factory=self.actions_controller.scan_profile,
+            success_message=lambda data: self._format_scan_message(data, automatic=True),
+        )
+
+    def _format_scan_message(self, payload: dict[str, list[Any]], automatic: bool = False) -> str:
+        experiencias = payload.get("Experiência", [])
+        formacao = payload.get("Formação", [])
+        competencias = payload.get("Competências", [])
+        prefix = "Varredura automática concluída. " if automatic else "Varredura concluída. "
+        return (
+            prefix
+            + f"Experiências registradas: {len(experiencias)}. "
+            + f"Formações registradas: {len(formacao)}. "
+            + f"Competências registradas: {len(competencias)}."
+        )
 
     def _refresh_profile_summary(self) -> None:
         if self.profile_text is None:
@@ -244,3 +250,16 @@ class HomeScreen(BaseScreen):
         self.profile_text.delete("1.0", tk.END)
         self.profile_text.insert(tk.END, text_content)
         self.profile_text.configure(state="disabled")
+
+    def _calculate_wraplength(self, width: int | None = None) -> int:
+        available_width = width if width is not None else self.winfo_width()
+        if not available_width:
+            available_width = 720
+        padding = self.tokens.spacing.section * 2
+        return max(available_width - padding, 320)
+
+    def _on_resize(self, event: tk.Event) -> None:  # type: ignore[override]
+        wraplength = self._calculate_wraplength(event.width)
+        for label in (self.description_label, self.message_label, self.status_label):
+            if label is not None:
+                label.configure(wraplength=wraplength)
